@@ -1,0 +1,607 @@
+:root {
+  --bg-dark: #090b10;
+  --bg-gradient: radial-gradient(circle at 50% 20%, #151d2f 0%, #080a0f 70%, #040508 100%);
+  --panel-bg: rgba(16, 22, 34, 0.85);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --accent-blue: #38bdf8;
+  --accent-glow: rgba(56, 189, 248, 0.3);
+  --pcb-blue: #0c203b;
+  --pcb-dark: #071324;
+  --pcb-silkscreen: rgba(255, 255, 255, 0.85);
+  --pin-gold: #e2b042;
+  --pin-solder: #9aa8b8;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  
+  /* OLED Display Default Colors (Pale Blue) */
+  --oled-screen-bg: #a2c9e2;
+  --oled-screen-ink: #0e1422;
+  --oled-grid-color: rgba(144, 182, 208, 0.35);
+  --oled-bloom: rgba(162, 201, 226, 0.15);
+
+  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-pixel: 'VT323', monospace;
+}
+
+/* Palette Overrides */
+[data-palette="oled-white"] {
+  --oled-screen-bg: #e2e8f0;
+  --oled-screen-ink: #0f172a;
+  --oled-grid-color: rgba(203, 213, 225, 0.4);
+  --oled-bloom: rgba(226, 232, 240, 0.2);
+}
+
+[data-palette="amber-phosphor"] {
+  --oled-screen-bg: #ffb833;
+  --oled-screen-ink: #2b1600;
+  --oled-grid-color: rgba(220, 150, 20, 0.4);
+  --oled-bloom: rgba(255, 184, 51, 0.25);
+}
+
+[data-palette="matrix-green"] {
+  --oled-screen-bg: #5bf870;
+  --oled-screen-ink: #062409;
+  --oled-grid-color: rgba(60, 190, 80, 0.35);
+  --oled-bloom: rgba(91, 248, 112, 0.22);
+}
+
+[data-palette="inverted"] {
+  --oled-screen-bg: #0d121d;
+  --oled-screen-ink: #8fd2ff;
+  --oled-grid-color: rgba(20, 30, 48, 0.8);
+  --oled-bloom: rgba(143, 210, 255, 0.3);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-dark);
+  background-image: var(--bg-gradient);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  user-select: none;
+}
+
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  gap: 1rem;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  background: var(--panel-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.header-branding {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.badge-tag {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0.5rem;
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--accent-blue);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.app-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.app-title span {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pill-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.65rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--panel-border);
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.pill-dot {
+  width: 6px;
+  height: 6px;
+  background: #22c55e;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #22c55e;
+}
+
+.pill-label {
+  color: var(--text-muted);
+}
+
+.pill-value {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+/* Main Stage / Screen Viewport */
+.stage-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 0;
+  padding: 0.5rem;
+}
+
+.device-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 860px;
+}
+
+/* SSD1306 PCB Board */
+.oled-pcb-board {
+  position: relative;
+  background: linear-gradient(145deg, #102746 0%, #081528 100%);
+  border: 2px solid #1e3f6d;
+  border-radius: 18px;
+  padding: 2.25rem 2.5rem 1.75rem;
+  box-shadow: 
+    0 24px 60px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 1px 0 rgba(255, 255, 255, 0.2) inset;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+/* Mounting Holes */
+.mounting-hole {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: #050b13;
+  border: 2px solid #d4a843;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(212, 168, 67, 0.4), inset 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.hole-tl { top: 12px; left: 14px; }
+.hole-tr { top: 12px; right: 14px; }
+.hole-bl { bottom: 12px; left: 14px; }
+.hole-br { bottom: 12px; right: 14px; }
+
+/* Pin Header Group */
+.pin-header-group {
+  display: flex;
+  gap: 1.75rem;
+  margin-bottom: 1.25rem;
+  padding: 0.2rem 1.2rem;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pin-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.pin-num {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: #64748b;
+}
+
+.pin-solder {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #e2e8f0 30%, #64748b 70%, #334155 100%);
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+
+.pin-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--pcb-silkscreen);
+  letter-spacing: 0.05em;
+}
+
+/* Glass Screen Bezel */
+.oled-glass-bezel {
+  width: 100%;
+  background: #020408;
+  border-radius: 10px;
+  padding: 0.85rem 1rem 0.6rem;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.8),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Screen Viewport: Strict 2:1 Aspect Ratio (128x64) */
+.oled-screen-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  background-color: var(--oled-screen-bg);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 
+    0 0 35px var(--oled-bloom),
+    inset 0 0 10px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#display-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Pixel Matrix Grid Overlay (Physical Dot Grid Texture) */
+.pixel-matrix-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background-image: 
+    linear-gradient(to right, var(--oled-grid-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--oled-grid-color) 1px, transparent 1px);
+  background-size: calc(100% / 128) calc(100% / 64);
+  mix-blend-mode: multiply;
+  opacity: 0.45;
+}
+
+/* Subtle Glass Reflection */
+.glass-glare-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 30%, transparent 60%);
+}
+
+.bezel-bottom-tab {
+  margin-top: 0.4rem;
+}
+
+.bezel-marking {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: #475569;
+  text-transform: uppercase;
+}
+
+/* Footer / HUD */
+.app-footer {
+  width: 100%;
+}
+
+.hud-panel {
+  background: var(--panel-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Live Scene Banner */
+.scene-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.scene-id-pill {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent-blue);
+  background: rgba(56, 189, 248, 0.1);
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  white-space: nowrap;
+}
+
+.scene-lyric-preview {
+  font-family: var(--font-pixel);
+  font-size: 1.4rem;
+  color: #fff;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.scene-timing-info {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Timeline Scrubber Row */
+.scrubber-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.time-readout {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+  min-width: 65px;
+}
+
+.timeline-slider-track {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+#timeline-slider {
+  width: 100%;
+  height: 8px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  transition: background 0.15s ease;
+}
+
+#timeline-slider:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+#timeline-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  box-shadow: 0 0 10px var(--accent-blue);
+  cursor: pointer;
+  border: 2px solid #fff;
+  transition: transform 0.1s ease;
+}
+
+#timeline-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+#timeline-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  box-shadow: 0 0 10px var(--accent-blue);
+  cursor: pointer;
+  border: 2px solid #fff;
+}
+
+/* Scene Markers on Slider */
+.scene-markers-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  pointer-events: none;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.scene-marker-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Control Actions Row */
+.control-actions-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.action-group-left, .action-group-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Buttons */
+button {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #fff;
+  padding: 0.5rem 1.15rem;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-main);
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--panel-border);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  border: 1px solid var(--panel-border);
+  font-size: 0.95rem;
+}
+
+.btn-icon:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+/* Select Pickers */
+.select-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.2rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+}
+
+.select-group label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.select-group select {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  outline: none;
+  cursor: pointer;
+  padding-right: 0.2rem;
+}
+
+.select-group select option {
+  background: #111827;
+  color: #fff;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .app-layout {
+    padding: 0.5rem;
+    height: auto;
+    min-height: 100vh;
+  }
+  .oled-pcb-board {
+    padding: 1.5rem 1.25rem 1.25rem;
+  }
+  .pin-header-group {
+    gap: 1rem;
+    margin-bottom: 0.85rem;
+  }
+  .control-actions-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .action-group-left, .action-group-right {
+    justify-content: space-between;
+  }
+}
