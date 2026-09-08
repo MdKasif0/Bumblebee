@@ -478,7 +478,7 @@ export class LCDRenderer {
         }
 
         // Final held ending posture
-        const charImg = this.sprites.get('char_singing_cat_21') || this.sprites.get('char_sweet_1');
+        const charImg = this.sprites.get('char_sweet_1');
         if (charImg) {
           ctx.drawImage(charImg, 0, 38);
         }
