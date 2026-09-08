@@ -67,6 +67,7 @@ export class SpriteManager {
 
       // Special impact overlays
       { key: 'special_igo', url: 'assets/special/text_i_go.png?v=2' },
+      { key: 'special_you_go', url: 'assets/special/text_you_go.png?v=2' },
       { key: 'special_boom_1', url: 'assets/special/boom_1.png?v=2' },
       { key: 'special_boom_2', url: 'assets/special/boom_2.png?v=2' },
       { key: 'special_boom_3', url: 'assets/special/boom_3.png?v=2' },
@@ -74,6 +75,10 @@ export class SpriteManager {
       { key: 'special_zoom_text_2', url: 'assets/special/zoom_text_2.png?v=2' },
       { key: 'special_zoom_flame_1', url: 'assets/special/zoom_flame_1.png?v=2' },
       { key: 'special_zoom_flame_2', url: 'assets/special/zoom_flame_2.png?v=2' },
+      { key: 'text_know_what', url: 'assets/text_rgba/20_know_what.png?v=2' },
+      { key: 'text_want_from_me', url: 'assets/text_rgba/21_want_from_me.png?v=2' },
+      { key: 'char_singing_cat_20', url: 'assets/chars_rgba/20_singing_cat.png?v=2' },
+      { key: 'char_singing_cat_21', url: 'assets/chars_rgba/21_singing_cat.png?v=2' },
     ];
 
     let loadedCount = 0;

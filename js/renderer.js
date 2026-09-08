@@ -137,64 +137,78 @@ export class LCDRenderer {
         break;
       }
 
-      case 'i_go_boom': {
-        // Cat peeking and bouncing at bottom
+      case 'i_go': {
+        // Very large emphasized lyric "I GO"
+        const igoImg = this.sprites.get('special_igo');
+        if (igoImg) {
+          ctx.drawImage(igoImg, 10, 8);
+        }
+
+        // Cat peeking partially beneath it near bottom
         const charImg = this.sprites.get('char_boom_1');
+        if (charImg) {
+          ctx.drawImage(charImg, 0, 68);
+        }
+        break;
+      }
 
-        if (time < 4.55) {
-          // 'I GO'
-          const igoImg = this.sprites.get('special_igo');
-          if (igoImg) {
-            ctx.drawImage(igoImg, 10, 8);
-          }
-          if (charImg) {
-            ctx.drawImage(charImg, 0, 68);
-          }
+      case 'boom': {
+        // Massive BOOM hits with recoil shake
+        let boomKey = 'special_boom_1';
+        let posX = -30;
+        let posY = 8;
+        let recoilY = 6;
+
+        if (time < 4.97) {
+          boomKey = 'special_boom_1';
+          posX = -30;
+          recoilY = 6;
+          if (time - 4.30 < 0.08) this.triggerShake(7);
+        } else if (time >= 4.97 && time < 5.55) {
+          boomKey = 'special_boom_2';
+          posX = 0;
+          recoilY = 8;
+          if (time - 4.97 < 0.08) this.triggerShake(9);
         } else {
-          // BOOM hits with massive impacts!
-          let boomKey = 'special_boom_1';
-          let posX = 0;
-          let posY = 8;
-          let recoilY = 0;
+          boomKey = 'special_boom_3';
+          posX = 30;
+          recoilY = 12;
+          if (time - 5.55 < 0.08) this.triggerShake(12);
+        }
 
-          if (time >= 4.55 && time < 4.97) {
-            boomKey = 'special_boom_1';
-            posX = -30;
-            recoilY = 6;
-            if (time - 4.55 < 0.08) this.triggerShake(7);
-          } else if (time >= 4.97 && time < 5.55) {
-            boomKey = 'special_boom_2';
-            posX = 0;
-            recoilY = 8;
-            if (time - 4.97 < 0.08) this.triggerShake(9);
-          } else if (time >= 5.55 && time < 5.90) {
-            boomKey = 'special_boom_3';
-            posX = 30;
-            recoilY = 10;
-            if (time - 5.55 < 0.08) this.triggerShake(11);
-          } else {
-            boomKey = 'special_boom_2';
-            posX = 0;
-            recoilY = 12;
-            if (time - 5.90 < 0.08) this.triggerShake(14);
-          }
+        const boomImg = this.sprites.get(boomKey);
+        if (boomImg) {
+          ctx.drawImage(boomImg, posX, posY);
+        }
 
-          const boomImg = this.sprites.get(boomKey);
-          if (boomImg) {
-            ctx.drawImage(boomImg, posX, posY);
-          }
+        const charImg = this.sprites.get('char_boom_1');
+        if (charImg) {
+          const vibrate = (Math.random() - 0.5) * 3;
+          ctx.drawImage(charImg, Math.round(vibrate), 68 + recoilY);
+        }
+        break;
+      }
 
-          if (charImg) {
-            const vibrate = (Math.random() - 0.5) * 4;
-            ctx.drawImage(charImg, Math.round(vibrate), 68 + recoilY);
-          }
+      case 'you_go': {
+        // Short emphasized lyric transition: "YOU GO"
+        const youGoImg = this.sprites.get('special_you_go');
+        if (youGoImg) {
+          ctx.drawImage(youGoImg, 0, 6);
+        }
+
+        // Emerging flame silhouette
+        const flameStep = Math.floor(time * 12) % 2;
+        const flameKey = flameStep === 0 ? 'special_zoom_flame_1' : 'special_zoom_flame_2';
+        const flameImg = this.sprites.get(flameKey);
+        if (flameImg) {
+          ctx.drawImage(flameImg, 0, 58);
         }
         break;
       }
 
       case 'zoom': {
         // ZOOM text moving across top
-        const zoomStep = Math.floor((time - 6.0) / 0.42) % 3;
+        const zoomStep = Math.floor((time - 5.93) / 0.40) % 3;
         const zoomImg = this.sprites.get(zoomStep % 2 === 0 ? 'special_zoom_text_1' : 'special_zoom_text_2');
         const zoomX = (zoomStep === 0) ? -40 : (zoomStep === 1 ? 0 : 40);
 
@@ -202,7 +216,7 @@ export class LCDRenderer {
           ctx.drawImage(zoomImg, zoomX, 4);
         }
 
-        // Jagged spiky flame / explosion shape flickering rapidly (8-10 Hz)
+        // Jagged spiky flame / explosion shape flickering rapidly (8-12 Hz)
         const flameStep = Math.floor(time * 12) % 2;
         const flameKey = flameStep === 0 ? 'special_zoom_flame_1' : 'special_zoom_flame_2';
         const flameImg = this.sprites.get(flameKey);
@@ -215,7 +229,7 @@ export class LCDRenderer {
       }
 
       case 'playboy': {
-        // Text: 'YOU'RE MY PLAYBOY'
+        // Text: "YOU'RE MY PLAYBOY"
         const textImg = this.sprites.get('text_playboy');
         if (textImg) {
           ctx.drawImage(textImg, 0, 6);
@@ -233,7 +247,7 @@ export class LCDRenderer {
         break;
       }
 
-      case 'playtoy_flower': {
+      case 'playtoy': {
         // Text: 'PLAYTOY'
         const textImg = this.sprites.get('text_flower');
         if (textImg) {
@@ -252,15 +266,12 @@ export class LCDRenderer {
         break;
       }
 
-      case 'two_cats_intro': {
-        // Two cats bouncing to the beat
-        const duoStep = Math.floor(beat) % 2;
-        const charKey = duoStep === 0 ? 'char_twocats_1' : 'char_twocats_2';
-        const charImg = this.sprites.get(charKey);
-        const bounce = Math.round(Math.abs(Math.sin(beat * Math.PI)) * 4);
-
+      case 'transitional_blank': {
+        // Transitional blank/near-blank period
+        // Keep pale LCD background visible with only tiny remnants near bottom
+        const charImg = this.sprites.get('char_twocats_1');
         if (charImg) {
-          ctx.drawImage(charImg, 0, 40 - bounce);
+          ctx.drawImage(charImg, 0, 68);
         }
         break;
       }
@@ -272,7 +283,7 @@ export class LCDRenderer {
           ctx.drawImage(textImg, 0, 6);
         }
 
-        // Strawberry cat & wand cat dancing
+        // Two characters dancing
         const step = Math.floor(beat) % 2;
         const charKey = step === 0 ? 'char_wanna_1' : 'char_wanna_2';
         const charImg = this.sprites.get(charKey);
@@ -284,7 +295,7 @@ export class LCDRenderer {
         break;
       }
 
-      case 'until_the_end': {
+      case 'until_end': {
         // Text: 'UNTIL THE END'
         const textImg = this.sprites.get('text_until');
         if (textImg) {
@@ -303,7 +314,7 @@ export class LCDRenderer {
         break;
       }
 
-      case 'give_my_heart': {
+      case 'give_heart': {
         // Text: 'I GIVE MY HEART'
         const textImg = this.sprites.get('text_give');
         if (textImg) {
@@ -418,16 +429,31 @@ export class LCDRenderer {
       }
 
       case 'sweet_little': {
-        // Finale: 'SWEET LITTLE' -> 'I KNOW WHAT YOU' -> 'WANT FROM ME'
-        if (time < 30.17) {
-          const textImg = this.sprites.get('text_sweet');
-          if (textImg) {
-            ctx.drawImage(textImg, 0, 6);
-          }
-        } else if (time >= 30.17 && time < 30.93) {
-          this.typography.drawText(ctx, 'I KNOW WHAT YOU', 128, 18, { scale: 2, centered: true });
+        // Text: "SWEET LITTLE BUMBLEBEE"
+        const textImg = this.sprites.get('text_sweet');
+        if (textImg) {
+          ctx.drawImage(textImg, 0, 6);
+        }
+
+        // Giant cat close-up singing chorus
+        const mouthOpen = Math.floor(beat * 2) % 2 === 0;
+        const charKey = mouthOpen ? 'char_sweet_2' : 'char_sweet_1';
+        const charImg = this.sprites.get(charKey);
+        const headBob = Math.round(Math.abs(Math.sin(beat * Math.PI)) * 2);
+
+        if (charImg) {
+          ctx.drawImage(charImg, 0, 38 - headBob);
+        }
+        break;
+      }
+
+      case 'know_what': {
+        // Text: "I KNOW WHAT YOU"
+        const textImg = this.sprites.get('text_know_what');
+        if (textImg) {
+          ctx.drawImage(textImg, 0, 6);
         } else {
-          this.typography.drawText(ctx, 'WANT FROM ME', 128, 18, { scale: 2, centered: true });
+          this.typography.drawText(ctx, 'I KNOW WHAT YOU', 128, 18, { scale: 2, centered: true });
         }
 
         // Giant cat close-up singing
@@ -438,6 +464,23 @@ export class LCDRenderer {
 
         if (charImg) {
           ctx.drawImage(charImg, 0, 38 - headBob);
+        }
+        break;
+      }
+
+      case 'want_from_me': {
+        // Text: "WANT FROM ME"
+        const textImg = this.sprites.get('text_want_from_me');
+        if (textImg) {
+          ctx.drawImage(textImg, 0, 6);
+        } else {
+          this.typography.drawText(ctx, 'WANT FROM ME', 128, 18, { scale: 2, centered: true });
+        }
+
+        // Final held ending posture
+        const charImg = this.sprites.get('char_singing_cat_21') || this.sprites.get('char_sweet_1');
+        if (charImg) {
+          ctx.drawImage(charImg, 0, 38);
         }
         break;
       }
