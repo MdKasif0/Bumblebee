@@ -196,6 +196,7 @@ class BumblebeeApp {
   }
 
   togglePlay() {
+    this.dismissOverlay();
     if (this.isPlaying) {
       this.pause();
     } else {
@@ -213,7 +214,14 @@ class BumblebeeApp {
     this.audio.pause();
   }
 
+  dismissOverlay() {
+    if (this.startOverlay && !this.startOverlay.classList.contains('hidden')) {
+      this.startOverlay.classList.add('hidden');
+    }
+  }
+
   seekTo(seconds) {
+    this.dismissOverlay();
     const clamped = Math.max(0, Math.min(this.duration, seconds));
     if (this.audio.readyState >= 1) {
       this.audio.currentTime = clamped;
