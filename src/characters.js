@@ -101,61 +101,96 @@ export class CharacterRenderer {
   }
 
   // =========================================================================
-  // 1. POSE_A: INITIAL / STATIC POSE (Pointed Hood Wizard / Bee Figure)
+  // 1. POSE_A: INITIAL / STATIC POSE (Hooded Ghost / Wizard Figure)
   // =========================================================================
   drawPoseA_HoodedFigure(ctx, cx, cy, scale, variant, tick) {
     const bob = (tick % 4 < 2) ? 0 : 1;
-    const x = cx + ((variant === 1) ? 0.5 : 0);
+    const x = cx;
     const y = cy + bob;
 
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(scale, scale);
 
-    // Pom-pom / tassel at tip of hat
-    const pomJitter = (variant === 2) ? 1 : 0;
-    ctx.beginPath();
-    ctx.arc(0, -25 + pomJitter, 2.5, 0, Math.PI * 2);
-    ctx.fill();
+    const bg = this.activeBg || '#a6cce6';
 
-    // Tall pointed cone hat
+    // 1. Top ornament (bell / hat ornament with notch)
+    const tipJitter = (variant === 2) ? -0.5 : 0;
+    ctx.fillRect(-3, -31 + tipJitter, 6, 5);
+    ctx.fillStyle = bg;
+    ctx.fillRect(-1, -30 + tipJitter, 2, 2);
+    ctx.fillStyle = ctx.strokeStyle;
+
+    // Small connector neck
     ctx.beginPath();
-    ctx.moveTo(0, -22);
-    // Asymmetric irregular cone sides
-    ctx.quadraticCurveTo(8 + (variant * 0.5), -5, 12, 10);
-    ctx.lineTo(-12, 10);
-    ctx.quadraticCurveTo(-8 - (variant * 0.5), -5, 0, -22);
+    ctx.moveTo(0, -26 + tipJitter);
+    ctx.lineTo(0, -24);
     ctx.stroke();
 
-    // Inner face oval
+    // 2. Outer hood / cloak silhouette (organic convex curves flaring to shoulders)
     ctx.beginPath();
-    ctx.ellipse(0, -2, 7.5, 7, 0, 0, Math.PI * 2);
+    // Left side: from apex, curving out around face, flaring over shoulder, dropping to bottom bezel
+    ctx.moveTo(0, -24);
+    ctx.quadraticCurveTo(-4, -14, -11, -2);
+    ctx.quadraticCurveTo(-17, 7, -22, 16);
+    ctx.lineTo(-22, 26);
+
+    // Right side: from apex, curving out around face, flaring over shoulder, dropping to bottom bezel
+    ctx.moveTo(0, -24);
+    ctx.quadraticCurveTo(4, -14, 11, -2);
+    ctx.quadraticCurveTo(17, 7, 22, 16);
+    ctx.lineTo(22, 26);
     ctx.stroke();
 
-    // Cross / star sparkle eyes
+    // Inner vertical cloak fold lines rising from bottom bezel
+    ctx.beginPath();
+    ctx.moveTo(-14, 26);
+    ctx.lineTo(-14, 14);
+    ctx.moveTo(14, 26);
+    ctx.lineTo(14, 14);
+    ctx.stroke();
+
+    // 3. Rounded Hood Opening (Face cutout framing the eyes)
+    ctx.beginPath();
+    ctx.moveTo(-8, -9);
+    ctx.quadraticCurveTo(0, -10.5, 8, -9);
+    ctx.quadraticCurveTo(11, -3, 9, 4);
+    ctx.quadraticCurveTo(0, 7.5, -9, 4);
+    ctx.quadraticCurveTo(-11, -3, -8, -9);
+    ctx.stroke();
+
+    // Collar V-neck lines from chin to star
+    ctx.beginPath();
+    ctx.moveTo(-3, 6);
+    ctx.lineTo(-1, 14);
+    ctx.moveTo(3, 6);
+    ctx.lineTo(1, 14);
+    ctx.stroke();
+
+    // 4. Eyes: large cute expressive ovals with specular glints
     // Left eye
-    ctx.fillRect(-4, -3, 2, 2);
-    ctx.fillRect(-5, -2.5, 4, 1);
-    ctx.fillRect(-3.5, -4, 1, 4);
+    ctx.beginPath();
+    ctx.ellipse(-5.5, -2, 3.5, 3.8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Left eye glint
+    ctx.fillStyle = bg;
+    ctx.fillRect(-7.5, -3.5, 2, 2);
+    ctx.fillStyle = ctx.strokeStyle;
 
     // Right eye
-    ctx.fillRect(3, -3, 2, 2);
-    ctx.fillRect(2, -2.5, 4, 1);
-    ctx.fillRect(3.5, -4, 1, 4);
-
-    // Tiny mouth/snout tick
-    ctx.fillRect(0, 1.5, 1, 1);
-
-    // Cloaked shoulders
     ctx.beginPath();
-    ctx.moveTo(-11, 10);
-    ctx.lineTo(-15, 23);
-    ctx.lineTo(15, 23);
-    ctx.lineTo(11, 10);
-    ctx.stroke();
+    ctx.ellipse(5.5, -2, 3.5, 3.8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Right eye glint
+    ctx.fillStyle = bg;
+    ctx.fillRect(3.5, -3.5, 2, 2);
+    ctx.fillStyle = ctx.strokeStyle;
 
-    // Chest star / bowtie emblem
-    this.drawStar(ctx, 0, 16, 3.5, 1.5);
+    // Subtle mouth tick
+    ctx.fillRect(-1.5, 2.5, 3, 1);
+
+    // 5. Chest Star Emblem (bold 5-pointed star)
+    this.drawStar(ctx, 0, 18, 4.5, 2.0);
     ctx.fill();
 
     ctx.restore();
