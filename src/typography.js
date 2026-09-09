@@ -472,6 +472,7 @@ export class PixelTypography {
     const color = options.color || '#0e1524';
     const isHeavy = Boolean(options.isHeavy);
     const applyJitter = options.applyJitter !== false;
+    const tick = options.tick !== undefined ? options.tick : (options.time ? Math.floor(options.time * 6) : 0);
 
     const lines = text.toUpperCase().split('\n');
     ctx.fillStyle = color;
@@ -499,15 +500,16 @@ export class PixelTypography {
         const glyphWidth = glyph[0].length;
         const glyphHeight = glyph.length;
 
-        // Controlled subtle baseline irregularity (0 or 1 pixel jitter per character)
+        // Controlled subtle per-letter offset (0, +1, or -1 pixel discrete step)
         let charJitterY = 0;
         if (applyJitter && !isHeavy) {
-          const pseudoHash = (char.charCodeAt(0) * 17 + i * 31 + lineIndex * 13) % 5;
-          if (pseudoHash === 1) charJitterY = 1;
-          else if (pseudoHash === 3) charJitterY = -1;
+          // Deterministic pseudo-random seed per letter and stepped rhythm tick
+          const seed = (char.charCodeAt(0) * 19 + i * 29 + lineIndex * 13 + Math.floor(tick / 2)) % 6;
+          if (seed === 1) charJitterY = 1;
+          else if (seed === 4) charJitterY = -1;
         }
 
-        const renderY = curY + Math.round(charJitterY * (scale > 1.2 ? 0.5 : 1));
+        const renderY = curY + charJitterY;
 
         for (let r = 0; r < glyphHeight; r++) {
           const rowStr = glyph[r];
