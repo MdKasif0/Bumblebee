@@ -198,16 +198,18 @@ export class CharacterRenderer {
   // 3. POSE_C: SIDEWAYS / LEANING / WALKING POSE (Walking Cat)
   // =========================================================================
   drawPoseC_WalkingCat(ctx, cx, cy, scale, variant, tick, progress) {
-    // Left-to-right stepped progression
+    // Discrete stepped walk progression: advances across discrete integer positions
     const walkDistance = 90;
     const startX = 18;
-    const curX = startX + (progress * walkDistance);
+    const stepCount = 14;
+    const discreteStep = Math.floor(progress * stepCount);
+    const curX = Math.round(startX + (discreteStep / stepCount) * walkDistance);
     const stepFrame = Math.floor(tick / 2) % 4; // 4-frame stepped walk cycle
     const bob = (stepFrame % 2 === 0) ? 0 : 1;
     const y = cy + bob;
 
     ctx.save();
-    ctx.translate(Math.round(curX), y);
+    ctx.translate(curX, y);
     ctx.scale(scale, scale);
 
     // Head tilted up & left toward text
@@ -452,7 +454,9 @@ export class CharacterRenderer {
 
   // Scene 20: Knife Cat ("TO MAKE YOU SEE IT'S TRUE")
   drawPoseF_KnifeCat(ctx, cx, cy, scale, variant, tick, progress) {
-    const sway = Math.sin(tick * 0.4) * 1.5;
+    // Stepped discrete sway states (-1px, 0px, +1px)
+    const swayCycle = Math.floor(tick / 2) % 4;
+    const sway = (swayCycle === 0) ? -1 : (swayCycle === 2 ? 1 : 0);
     ctx.save();
     ctx.translate(cx, cy);
     ctx.scale(scale, scale);
@@ -562,7 +566,8 @@ export class CharacterRenderer {
 
   // Scene 22: Hypnotic Spiral Eyes Cat ("BABY CAN'T YOU SEE?")
   drawPoseF_HypnoCat(ctx, cx, cy, scale, variant, tick) {
-    const wobble = Math.sin(tick * 0.5) * 1;
+    // Stepped discrete wobble (0px or 1px jump)
+    const wobble = (tick % 4 < 2) ? 0 : 1;
     ctx.save();
     ctx.translate(cx, cy + wobble);
     ctx.scale(scale, scale);
@@ -936,8 +941,11 @@ export class CharacterRenderer {
   // =========================================================================
   // 8. SPECIAL GRAPHIC: DAISY FLOWER & PEEKING CAT (Scene 14 "PLAYTOY")
   // =========================================================================
+  // Scene 14 "PLAYTOY": Daisy Flower & Peeking Cat
   drawCatAndFlower(ctx, cx, cy, scale, variant, tick) {
-    const sway = Math.sin(tick * 0.3) * 1.5;
+    // Stepped discrete sway states (-1px, 0px, +1px)
+    const swayCycle = Math.floor(tick / 2) % 4;
+    const sway = (swayCycle === 0) ? -1 : (swayCycle === 2 ? 1 : 0);
     ctx.save();
     ctx.translate(cx, cy);
     ctx.scale(scale, scale);
