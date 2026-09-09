@@ -34,39 +34,7 @@ pie title "why draw everything with code instead of playing a video file?"
 
 ---
 
-### 2. user experience flowchart
-
-```mermaid
-graph TD
-    A["🌐 You open the website"] --> B["👀 See the cat chilling behind frosted glass"]
-    B --> C["👆 You click 'TAP ANYWHERE TO START'"]
-    C --> D["🔊 Audio blasts in crystal clarity"]
-    D --> E["🐱 Cat starts vibing at 60 FPS"]
-    E --> F["🎵 ZOOM PLAYTOY INTENSIFIES"]
-    F --> G["🔁 Timeline hits 31.87 seconds"]
-    G --> H["🔄 Seamlessly loops back to 0.00s"]
-    H --> E
-    H -.-> I["🚪 Trying to close the tab?"]
-    I --> J["❌ You can't. The loop is hypnotic. It is now 3:00 AM."]
-```
-
----
-
-### 3. bundle weight comparison
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│                  BUNDLE SIZE REALITY CHECK                   │
-├───────────────────────────────┬──────────────────────────────┤
-│ "lightweight" modern web app  │ █████████████████████ 450 MB │
-│ an electron app with 1 button │ ████████████████████████ 1GB │
-│ this entire procedural universe│ █ 0.5 MB (literally just mp3)│
-└───────────────────────────────┴──────────────────────────────┘
-```
-
----
-
-### 4. developer emotional journey
+### 2. developer emotional journey
 
 ```mermaid
 gitGraph
@@ -86,6 +54,39 @@ gitGraph
     merge browser-audio-fight id: "8. audio & visuals in perfect sync"
     commit id: "9. infinite fullscreen loop forever"
 ```
+
+---
+
+### 3. user experience flowchart
+
+```mermaid
+graph TD
+    A["🌐 You open the website"] --> B["👀 See the cat chilling behind frosted glass"]
+    B --> C["👆 You click 'TAP ANYWHERE TO START'"]
+    C --> D["🔊 Audio blasts in crystal clarity"]
+    D --> E["🐱 Cat starts vibing at 60 FPS"]
+    E --> F["🎵 ZOOM PLAYTOY INTENSIFIES"]
+    F --> G["🔁 Timeline hits 31.87 seconds"]
+    G --> H["🔄 Seamlessly loops back to 0.00s"]
+    H --> E
+    H -.-> I["🚪 Trying to close the tab?"]
+    I --> J["❌ You can't. The loop is hypnotic. It is now 3:00 AM."]
+```
+
+---
+
+### 4. bundle weight comparison
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                  BUNDLE SIZE REALITY CHECK                   │
+├───────────────────────────────┬──────────────────────────────┤
+│ "lightweight" modern web app  │ █████████████████████ 450 MB │
+│ an electron app with 1 button │ ████████████████████████ 1GB │
+│ this entire procedural universe│ █ 0.5 MB (literally just mp3)│
+└───────────────────────────────┴──────────────────────────────┘
+```
+
 
 ---
 
