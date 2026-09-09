@@ -32,6 +32,76 @@ So here we are.
 
 ---
 
+## completely necessary charts & statistical analysis 📊
+
+### 1. why did we do this?
+
+```mermaid
+pie title "why draw everything with code instead of playing a video file?"
+    "pure stubborn refusal to use a single image" : 45
+    "the little pixel cat gave us serotonin" : 35
+    "wanted to see if 1-bit monochrome quantization in 2026 was possible" : 15
+    "rational life choices" : 5
+```
+
+---
+
+### 2. user experience flowchart
+
+```mermaid
+graph TD
+    A["🌐 You open the website"] --> B["👀 See the cat chilling behind frosted glass"]
+    B --> C["👆 You click 'TAP ANYWHERE TO START'"]
+    C --> D["🔊 Audio blasts in crystal clarity"]
+    D --> E["🐱 Cat starts vibing at 60 FPS"]
+    E --> F["🎵 ZOOM PLAYTOY INTENSIFIES"]
+    F --> G["🔁 Timeline hits 31.87 seconds"]
+    G --> H["🔄 Seamlessly loops back to 0.00s"]
+    H --> E
+    H -.-> I["🚪 Trying to close the tab?"]
+    I --> J["❌ You can't. The loop is hypnotic. It is now 3:00 AM."]
+```
+
+---
+
+### 3. bundle weight comparison
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                  BUNDLE SIZE REALITY CHECK                   │
+├───────────────────────────────┬──────────────────────────────┤
+│ "lightweight" modern web app  │ █████████████████████ 450 MB │
+│ an electron app with 1 button │ ████████████████████████ 1GB │
+│ this entire procedural universe│ █ 0.5 MB (literally just mp3)│
+└───────────────────────────────┴──────────────────────────────┘
+```
+
+---
+
+### 4. developer emotional journey
+
+```mermaid
+gitGraph
+    commit id: "1. 'this will take 20 minutes max'"
+    commit id: "2. drawing cat ears with bezier curves"
+    branch blur-crisis
+    checkout blur-crisis
+    commit id: "3. wait why is canvas antialiasing everything"
+    commit id: "4. write custom 1-bit euclidean quantization pass"
+    checkout main
+    merge blur-crisis id: "5. blur is permanently banned"
+    branch browser-audio-fight
+    checkout browser-audio-fight
+    commit id: "6. browser blocks audio autoplay on cold load"
+    commit id: "7. engineer frosted glass tap-to-start overlay"
+    checkout main
+    merge browser-audio-fight id: "8. audio & visuals in perfect sync"
+    commit id: "9. infinite fullscreen loop forever"
+```
+
+
+---
+
 ## how it actually works
 
 ```
