@@ -11,13 +11,15 @@ export class AudioClock {
     this.simulatedPlaying = false;
     this.playbackRate = 1.0;
     this.duration = 31.87;
+    this.isLooping = false;
 
     this.listeners = {
       play: [],
       pause: [],
       seek: [],
       ended: [],
-      timeupdate: []
+      timeupdate: [],
+      durationchange: []
     };
 
     this._initAudio();
@@ -33,6 +35,7 @@ export class AudioClock {
     this.audio.addEventListener('loadedmetadata', () => {
       if (this.audio.duration && !isNaN(this.audio.duration)) {
         this.duration = this.audio.duration;
+        this._emit('durationchange', this.duration);
       }
     });
 
@@ -49,7 +52,12 @@ export class AudioClock {
     });
 
     this.audio.addEventListener('ended', () => {
-      this._emit('ended');
+      if (this.isLooping) {
+        this.seek(0);
+        this.play();
+      } else {
+        this._emit('ended');
+      }
     });
 
     this.audio.addEventListener('error', (e) => {
@@ -74,12 +82,10 @@ export class AudioClock {
 
   /**
    * Current master time in seconds.
+   * Directly driven by audio.currentTime with zero drift.
    */
   get currentTime() {
     if (this.audio && !this.isFallback && !this.audio.error) {
-      if (this.audio.paused && this.fallbackTime !== undefined) {
-        return this.fallbackTime;
-      }
       return this.audio.currentTime;
     }
     if (this.simulatedPlaying && this.lastFallbackTimestamp !== null) {
@@ -88,8 +94,13 @@ export class AudioClock {
       this.fallbackTime = Math.min(this.duration, this.fallbackTime + delta);
       this.lastFallbackTimestamp = now;
       if (this.fallbackTime >= this.duration) {
-        this.simulatedPlaying = false;
-        this._emit('ended');
+        if (this.isLooping) {
+          this.fallbackTime = 0;
+          this._emit('seek', 0);
+        } else {
+          this.simulatedPlaying = false;
+          this._emit('ended');
+        }
       }
     }
     return this.fallbackTime;
@@ -103,7 +114,7 @@ export class AudioClock {
       try {
         this.audio.currentTime = clamped;
       } catch (e) {
-        // Ignored if audio element is not yet interactive
+        console.warn('Seek error on audio element:', e);
       }
     }
     this._emit('seek', clamped);
@@ -182,5 +193,13 @@ export class AudioClock {
 
   get isMuted() {
     return this.audio ? this.audio.muted : false;
+  }
+
+  setLoop(loop) {
+    this.isLooping = Boolean(loop);
+  }
+
+  get loop() {
+    return this.isLooping;
   }
 }

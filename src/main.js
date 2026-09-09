@@ -35,6 +35,7 @@ export class AnimationController {
       iconPause: document.getElementById('icon-pause'),
       playPauseLabel: document.getElementById('play-pause-label'),
       btnRestart: document.getElementById('btn-restart'),
+      btnLoop: document.getElementById('btn-loop'),
       btnPrevScene: document.getElementById('btn-prev-scene'),
       btnNextScene: document.getElementById('btn-next-scene'),
       slider: document.getElementById('timeline-slider'),
@@ -49,6 +50,7 @@ export class AnimationController {
       speedSelect: document.getElementById('speed-select'),
       btnMute: document.getElementById('btn-mute'),
       muteIcon: document.getElementById('mute-icon'),
+      volumeSlider: document.getElementById('volume-slider'),
       btnFullscreen: document.getElementById('btn-fullscreen')
     };
 
@@ -104,11 +106,25 @@ export class AnimationController {
       this.dom.playPauseLabel.textContent = 'Play';
     });
 
-    // Restart Button
+    this.audioClock.on('durationchange', () => {
+      this._initUI();
+      this._renderSceneMarkers();
+    });
+
+    // Replay Button
     this.dom.btnRestart.addEventListener('click', () => {
       this.audioClock.seek(0);
       this.audioClock.play();
     });
+
+    // Loop / Repeat Button
+    if (this.dom.btnLoop) {
+      this.dom.btnLoop.addEventListener('click', () => {
+        const isLoop = !this.audioClock.loop;
+        this.audioClock.setLoop(isLoop);
+        this.dom.btnLoop.classList.toggle('active', isLoop);
+      });
+    }
 
     // Previous Scene
     this.dom.btnPrevScene.addEventListener('click', () => {
@@ -128,12 +144,14 @@ export class AnimationController {
       }
     });
 
-    // Timeline Slider Scrubbing
+    // Timeline Slider Scrubbing with immediate visual state calculation
     this.dom.slider.addEventListener('input', (e) => {
       this.isScrubbing = true;
       const targetTime = parseFloat(e.target.value);
       this.audioClock.seek(targetTime);
-      this._updateHUD(targetTime);
+      const scene = getSceneAtTime(targetTime);
+      this.renderer.render(scene, targetTime, this.characters, this.typography, this.effects);
+      this._updateHUD(targetTime, scene);
     });
 
     this.dom.slider.addEventListener('change', () => {
@@ -154,8 +172,26 @@ export class AnimationController {
     this.dom.btnMute.addEventListener('click', () => {
       const isMuted = !this.audioClock.isMuted;
       this.audioClock.setMuted(isMuted);
-      this.dom.muteIcon.textContent = isMuted ? '🔇' : '🔊';
+      this.dom.muteIcon.textContent = isMuted ? '🔇' : (this.audioClock.volume < 0.5 ? '🔉' : '🔊');
+      if (this.dom.volumeSlider) {
+        this.dom.volumeSlider.value = isMuted ? '0' : this.audioClock.volume.toString();
+      }
     });
+
+    // Volume Slider
+    if (this.dom.volumeSlider) {
+      this.dom.volumeSlider.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        this.audioClock.setVolume(val);
+        if (val === 0) {
+          this.audioClock.setMuted(true);
+          this.dom.muteIcon.textContent = '🔇';
+        } else {
+          this.audioClock.setMuted(false);
+          this.dom.muteIcon.textContent = val < 0.5 ? '🔉' : '🔊';
+        }
+      });
+    }
 
     // Fullscreen
     this.dom.btnFullscreen.addEventListener('click', () => {
@@ -186,8 +222,11 @@ export class AnimationController {
       } else if (e.code === 'Home') {
         e.preventDefault();
         this.audioClock.seek(0);
+        this.audioClock.play();
       } else if (e.code === 'KeyM') {
         this.dom.btnMute.click();
+      } else if (e.code === 'KeyL') {
+        if (this.dom.btnLoop) this.dom.btnLoop.click();
       }
     });
   }
@@ -235,10 +274,12 @@ export class AnimationController {
     this.dom.currentSceneId.textContent = `SCENE ${String(sceneIdx).padStart(2, '0')} / ${this.timeline.length}`;
     
     // Clean preview lyric
-    const displayLyric = scene.lyric ? scene.lyric.replace('\n', ' / ') : `[${scene.name}]`;
+    const displayLyric = scene.lyric ? scene.lyric.replace(/\n/g, ' / ') : `[${scene.name || scene.scene}]`;
     this.dom.currentLyric.textContent = displayLyric;
 
-    this.dom.currentTiming.textContent = `${scene.startTime.toFixed(2)}s – ${scene.endTime.toFixed(2)}s`;
+    const start = scene.start !== undefined ? scene.start : scene.startTime;
+    const end = scene.end !== undefined ? scene.end : scene.endTime;
+    this.dom.currentTiming.textContent = `${start.toFixed(2)}s – ${end.toFixed(2)}s`;
   }
 
   _formatTime(seconds) {

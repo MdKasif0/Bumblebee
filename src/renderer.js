@@ -42,6 +42,10 @@ export class SceneRenderer {
     };
 
     window.addEventListener('resize', resize);
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(resize);
+      ro.observe(this.canvas);
+    }
     // Initial size
     setTimeout(resize, 50);
   }

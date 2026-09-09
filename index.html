@@ -15,7 +15,7 @@
     <!-- Header -->
     <header class="app-header">
       <div class="header-branding">
-        <div class="badge-tag">STEP 3 / 5 ANIMATION TIMING</div>
+        <div class="badge-tag">STEP 4 / 5 AUDIO SYNC & CONTROLS</div>
         <h1 class="app-title">Bumblebee <span>LCD Recreation</span></h1>
       </div>
       <div class="header-meta">
@@ -78,11 +78,14 @@
               </svg>
               <span id="play-pause-label">Play</span>
             </button>
-            <button id="btn-restart" class="btn-secondary" title="Restart from beginning (Home)">
+            <button id="btn-restart" class="btn-secondary" title="Replay from beginning (Home)">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                 <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
               </svg>
-              <span>Restart</span>
+              <span>Replay</span>
+            </button>
+            <button id="btn-loop" class="btn-icon" title="Toggle Loop / Repeat (L)" aria-label="Toggle Loop">
+              <span id="loop-icon">🔁</span>
             </button>
             <button id="btn-prev-scene" class="btn-icon" title="Previous Scene (Left Arrow)">⏮</button>
             <button id="btn-next-scene" class="btn-icon" title="Next Scene (Right Arrow)">⏭</button>
@@ -111,10 +114,13 @@
               </select>
             </div>
 
-            <!-- Volume Control -->
-            <button id="btn-mute" class="btn-icon" title="Mute/Unmute Audio">
-              <span id="mute-icon">🔊</span>
-            </button>
+            <!-- Volume Control Group -->
+            <div class="volume-control-group">
+              <button id="btn-mute" class="btn-icon" title="Mute/Unmute Audio (M)">
+                <span id="mute-icon">🔊</span>
+              </button>
+              <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1" aria-label="Volume Slider" title="Volume">
+            </div>
 
             <!-- Fullscreen -->
             <button id="btn-fullscreen" class="btn-icon" title="Toggle Fullscreen">⛶</button>
