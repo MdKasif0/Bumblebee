@@ -205,7 +205,7 @@ export class AnimationController {
       }
 
       // Master audio clock time
-      const time = this.audioClock.currentTime;
+      const time = this.isScrubbing ? parseFloat(this.dom.slider.value) : this.audioClock.currentTime;
       const scene = getSceneAtTime(time);
 
       // Render frame
