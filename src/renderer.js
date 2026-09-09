@@ -47,6 +47,7 @@ export class SceneRenderer {
       ro.observe(this.canvas);
     }
     // Initial size
+    resize();
     setTimeout(resize, 50);
   }
 

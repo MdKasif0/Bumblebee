@@ -1,249 +1,66 @@
 /**
  * main.js - Central AnimationController.
  * Coordinates AudioClock, Timeline, SceneRenderer, PixelTypography,
- * CharacterRenderer, EffectsRenderer, and UI interactions.
+ * CharacterRenderer, and EffectsRenderer with autoplay and infinite looping.
+ * All UI controls, headers, timelines, and debug elements have been removed.
  */
 
-import { AudioClock } from './audio.js?v=5.1';
-import { TIMELINE, getSceneAtTime, getSceneIndexAtTime } from './timeline.js?v=5.1';
-import { SceneRenderer } from './renderer.js?v=5.1';
-import { PixelTypography } from './typography.js?v=5.1';
-import { CharacterRenderer } from './characters.js?v=5.1';
-import { EffectsRenderer } from './effects.js?v=5.1';
+import { AudioClock } from './audio.js';
+import { TIMELINE, getSceneAtTime } from './timeline.js';
+import { SceneRenderer } from './renderer.js';
+import { PixelTypography } from './typography.js';
+import { CharacterRenderer } from './characters.js';
+import { EffectsRenderer } from './effects.js';
 
 export class AnimationController {
   constructor() {
     // Core Subsystems
     this.audioClock = new AudioClock('audio-master');
     this.timeline = TIMELINE;
+    this.timelineDuration = 31.867;
     this.renderer = new SceneRenderer('display-canvas');
     this.typography = new PixelTypography();
     this.characters = new CharacterRenderer();
     this.effects = new EffectsRenderer();
 
-    // State
-    this.isScrubbing = false;
-    this.lastFrameTime = performance.now();
-    this.frameCount = 0;
-    this.fpsTimer = performance.now();
-    this.currentFps = 60;
-
-    // DOM Elements
-    this.dom = {
-      btnPlayPause: document.getElementById('btn-play-pause'),
-      iconPlay: document.getElementById('icon-play'),
-      iconPause: document.getElementById('icon-pause'),
-      playPauseLabel: document.getElementById('play-pause-label'),
-      btnRestart: document.getElementById('btn-restart'),
-      btnLoop: document.getElementById('btn-loop'),
-      btnPrevScene: document.getElementById('btn-prev-scene'),
-      btnNextScene: document.getElementById('btn-next-scene'),
-      slider: document.getElementById('timeline-slider'),
-      sceneMarkers: document.getElementById('scene-markers'),
-      currentTime: document.getElementById('current-time-display'),
-      totalTime: document.getElementById('total-time-display'),
-      currentSceneId: document.getElementById('current-scene-id'),
-      currentLyric: document.getElementById('current-lyric-display'),
-      currentTiming: document.getElementById('current-scene-timing'),
-      fpsCounter: document.getElementById('fps-counter'),
-      paletteSelect: document.getElementById('palette-select'),
-      speedSelect: document.getElementById('speed-select'),
-      btnMute: document.getElementById('btn-mute'),
-      muteIcon: document.getElementById('mute-icon'),
-      volumeSlider: document.getElementById('volume-slider'),
-      btnFullscreen: document.getElementById('btn-fullscreen')
-    };
-
-    this._initUI();
-    this._renderSceneMarkers();
-    this._bindEvents();
+    // Configure autoplay & loop
+    this._initAutoplay();
     this._startLoop();
   }
 
-  _initUI() {
-    this.dom.totalTime.textContent = this._formatTime(this.audioClock.duration);
-    this.dom.slider.max = this.audioClock.duration.toString();
-  }
+  _initAutoplay() {
+    this.audioClock.setLoop(true);
 
-  _renderSceneMarkers() {
-    if (!this.dom.sceneMarkers) return;
-    this.dom.sceneMarkers.innerHTML = '';
-    const totalDuration = this.audioClock.duration;
+    // Attempt unmuted audio autoplay immediately on load
+    this.audioClock.play().catch(() => {});
 
-    for (const scene of this.timeline) {
-      if (scene.id === 1) continue;
-      const marker = document.createElement('div');
-      marker.className = 'scene-marker-tick';
-      const pct = (scene.startTime / totalDuration) * 100;
-      marker.style.left = `${pct}%`;
-      marker.title = `Scene ${scene.id}: ${scene.name} (${scene.startTime.toFixed(2)}s)`;
-      this.dom.sceneMarkers.appendChild(marker);
-    }
-  }
-
-  _bindEvents() {
-    // Play/Pause Button
-    this.dom.btnPlayPause.addEventListener('click', () => {
-      this.audioClock.toggle();
-    });
-
-    // Audio Clock Events
-    this.audioClock.on('play', () => {
-      this.dom.iconPlay.style.display = 'none';
-      this.dom.iconPause.style.display = 'inline-block';
-      this.dom.playPauseLabel.textContent = 'Pause';
-    });
-
-    this.audioClock.on('pause', () => {
-      this.dom.iconPlay.style.display = 'inline-block';
-      this.dom.iconPause.style.display = 'none';
-      this.dom.playPauseLabel.textContent = 'Play';
-    });
-
-    this.audioClock.on('ended', () => {
-      this.dom.iconPlay.style.display = 'inline-block';
-      this.dom.iconPause.style.display = 'none';
-      this.dom.playPauseLabel.textContent = 'Play';
-    });
-
-    this.audioClock.on('durationchange', () => {
-      this._initUI();
-      this._renderSceneMarkers();
-    });
-
-    // Replay Button
-    this.dom.btnRestart.addEventListener('click', () => {
-      this.audioClock.seek(0);
-      this.audioClock.play();
-    });
-
-    // Loop / Repeat Button
-    if (this.dom.btnLoop) {
-      this.dom.btnLoop.addEventListener('click', () => {
-        const isLoop = !this.audioClock.loop;
-        this.audioClock.setLoop(isLoop);
-        this.dom.btnLoop.classList.toggle('active', isLoop);
-      });
-    }
-
-    // Previous Scene
-    this.dom.btnPrevScene.addEventListener('click', () => {
-      const curIdx = getSceneIndexAtTime(this.audioClock.currentTime);
-      if (curIdx > 0) {
-        this.audioClock.seek(this.timeline[curIdx - 1].startTime);
-      } else {
-        this.audioClock.seek(0);
+    // Technical fallback for browser autoplay restrictions:
+    // If unmuted autoplay is deferred by browser security policy, seamlessly start audio
+    // on the very first user interaction anywhere on the window without displaying any UI.
+    const unlockAudio = () => {
+      if (this.audioClock.audio && this.audioClock.audio.paused) {
+        this.audioClock.seek(this.audioClock.currentTime);
+        this.audioClock.play().catch(() => {});
       }
-    });
+    };
 
-    // Next Scene
-    this.dom.btnNextScene.addEventListener('click', () => {
-      const curIdx = getSceneIndexAtTime(this.audioClock.currentTime);
-      if (curIdx < this.timeline.length - 1) {
-        this.audioClock.seek(this.timeline[curIdx + 1].startTime);
-      }
-    });
-
-    // Timeline Slider Scrubbing with immediate visual state calculation
-    this.dom.slider.addEventListener('input', (e) => {
-      this.isScrubbing = true;
-      const targetTime = parseFloat(e.target.value);
-      this.audioClock.seek(targetTime);
-      const scene = getSceneAtTime(targetTime);
-      this.renderer.render(scene, targetTime, this.characters, this.typography, this.effects);
-      this._updateHUD(targetTime, scene);
-    });
-
-    this.dom.slider.addEventListener('change', () => {
-      this.isScrubbing = false;
-    });
-
-    // Palette Selector
-    this.dom.paletteSelect.addEventListener('change', (e) => {
-      this.effects.setPalette(e.target.value);
-    });
-
-    // Speed Selector
-    this.dom.speedSelect.addEventListener('change', (e) => {
-      this.audioClock.setPlaybackRate(parseFloat(e.target.value));
-    });
-
-    // Mute Button
-    this.dom.btnMute.addEventListener('click', () => {
-      const isMuted = !this.audioClock.isMuted;
-      this.audioClock.setMuted(isMuted);
-      this.dom.muteIcon.textContent = isMuted ? '🔇' : (this.audioClock.volume < 0.5 ? '🔉' : '🔊');
-      if (this.dom.volumeSlider) {
-        this.dom.volumeSlider.value = isMuted ? '0' : this.audioClock.volume.toString();
-      }
-    });
-
-    // Volume Slider
-    if (this.dom.volumeSlider) {
-      this.dom.volumeSlider.addEventListener('input', (e) => {
-        const val = parseFloat(e.target.value);
-        this.audioClock.setVolume(val);
-        if (val === 0) {
-          this.audioClock.setMuted(true);
-          this.dom.muteIcon.textContent = '🔇';
-        } else {
-          this.audioClock.setMuted(false);
-          this.dom.muteIcon.textContent = val < 0.5 ? '🔉' : '🔊';
-        }
-      });
-    }
-
-    // Fullscreen
-    this.dom.btnFullscreen.addEventListener('click', () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } else {
-        document.exitFullscreen().catch(() => {});
-      }
-    });
-
-    // Keyboard Shortcuts
-    window.addEventListener('keydown', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
-
-      if (e.code === 'Space') {
-        e.preventDefault();
-        this.audioClock.toggle();
-      } else if (e.code === 'ArrowLeft') {
-        e.preventDefault();
-        const curIdx = getSceneIndexAtTime(this.audioClock.currentTime);
-        const targetTime = Math.max(0, this.timeline[Math.max(0, curIdx - 1)].startTime);
-        this.audioClock.seek(targetTime);
-      } else if (e.code === 'ArrowRight') {
-        e.preventDefault();
-        const curIdx = getSceneIndexAtTime(this.audioClock.currentTime);
-        const targetTime = Math.min(this.audioClock.duration, this.timeline[Math.min(this.timeline.length - 1, curIdx + 1)].startTime);
-        this.audioClock.seek(targetTime);
-      } else if (e.code === 'Home') {
-        e.preventDefault();
-        this.audioClock.seek(0);
-        this.audioClock.play();
-      } else if (e.code === 'KeyM') {
-        this.dom.btnMute.click();
-      } else if (e.code === 'KeyL') {
-        if (this.dom.btnLoop) this.dom.btnLoop.click();
-      }
-    });
+    window.addEventListener('pointerdown', unlockAudio, { once: true, passive: true });
+    window.addEventListener('keydown', unlockAudio, { once: true, passive: true });
+    window.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
   }
 
   _startLoop() {
-    const loop = (timestamp) => {
-      // FPS measurement
-      this.frameCount++;
-      if (timestamp - this.fpsTimer >= 1000) {
-        this.currentFps = Math.round((this.frameCount * 1000) / (timestamp - this.fpsTimer));
-        this.dom.fpsCounter.textContent = `${this.currentFps} FPS`;
-        this.frameCount = 0;
-        this.fpsTimer = timestamp;
+    const loop = () => {
+      // Master audio clock time
+      let time = this.audioClock.currentTime;
+
+      // Infinite loop: when animation reaches exact end of timeline (or audio ends), restart from 0
+      if (time >= this.timelineDuration || (this.audioClock.audio && this.audioClock.audio.ended)) {
+        this.audioClock.seek(0);
+        this.audioClock.play().catch(() => {});
+        time = 0;
       }
 
-      // Master audio clock time
-      const time = this.isScrubbing ? parseFloat(this.dom.slider.value) : this.audioClock.currentTime;
       const scene = getSceneAtTime(time);
 
       // Render frame
@@ -255,39 +72,10 @@ export class AnimationController {
         this.effects
       );
 
-      // Update HUD if not actively scrubbing with mouse
-      if (!this.isScrubbing) {
-        this._updateHUD(time, scene);
-      }
-
       requestAnimationFrame(loop);
     };
 
     requestAnimationFrame(loop);
-  }
-
-  _updateHUD(time, scene = getSceneAtTime(time)) {
-    this.dom.currentTime.textContent = this._formatTime(time);
-    this.dom.slider.value = time.toString();
-
-    const sceneIdx = getSceneIndexAtTime(time) + 1;
-    this.dom.currentSceneId.textContent = `SCENE ${String(sceneIdx).padStart(2, '0')} / ${this.timeline.length}`;
-    
-    // Clean preview lyric
-    const displayLyric = scene.lyric ? scene.lyric.replace(/\n/g, ' / ') : `[${scene.name || scene.scene}]`;
-    this.dom.currentLyric.textContent = displayLyric;
-
-    const start = scene.start !== undefined ? scene.start : scene.startTime;
-    const end = scene.end !== undefined ? scene.end : scene.endTime;
-    this.dom.currentTiming.textContent = `${start.toFixed(2)}s – ${end.toFixed(2)}s`;
-  }
-
-  _formatTime(seconds) {
-    const s = Math.max(0, seconds);
-    const mins = Math.floor(s / 60);
-    const secs = Math.floor(s % 60);
-    const centis = Math.floor((s % 1) * 100);
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(centis).padStart(2, '0')}`;
   }
 }
 
