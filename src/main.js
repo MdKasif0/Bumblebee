@@ -1,8 +1,7 @@
 /**
  * main.js - Central AnimationController.
  * Coordinates AudioClock, Timeline, SceneRenderer, PixelTypography,
- * CharacterRenderer, and EffectsRenderer with autoplay and infinite looping.
- * All UI controls, headers, timelines, and debug elements have been removed.
+ * CharacterRenderer, and EffectsRenderer with user-initiated startup and infinite looping.
  */
 
 import { AudioClock } from './audio.js';
@@ -23,62 +22,83 @@ export class AnimationController {
     this.characters = new CharacterRenderer();
     this.effects = new EffectsRenderer();
 
-    // Configure autoplay & loop
-    this._initAutoplay();
-    this._startLoop();
+    this.isStarted = false;
+
+    // Render Scene 01 at time 0 so LCD display is visible behind translucent overlay
+    this._renderAtTime(0);
+
+    // Re-render preview on window resize if not yet started
+    window.addEventListener('resize', () => {
+      if (!this.isStarted) {
+        this._renderAtTime(0);
+      }
+    });
+
+    this._setupStartInteraction();
   }
 
-  _initAutoplay() {
+  _renderAtTime(time) {
+    const scene = getSceneAtTime(time);
+    this.renderer.render(
+      scene,
+      time,
+      this.characters,
+      this.typography,
+      this.effects
+    );
+  }
+
+  _setupStartInteraction() {
     this.audioClock.setLoop(true);
 
-    const activateSound = async () => {
-      const notice = document.getElementById('sound-notice');
-      if (notice) {
-        notice.style.opacity = '0';
-        setTimeout(() => notice.remove(), 300);
+    const startExperience = async () => {
+      if (this.isStarted) return;
+      this.isStarted = true;
+
+      // Smoothly dismiss translucent overlay
+      const overlay = document.getElementById('start-overlay');
+      if (overlay) {
+        overlay.classList.add('fade-out');
+        setTimeout(() => overlay.remove(), 400);
       }
 
+      // Initialize audio unmuted at time 0
       if (this.audioClock.audio) {
         this.audioClock.audio.muted = false;
         this.audioClock.audio.volume = 1.0;
-        try {
-          await this.audioClock.audio.play();
-        } catch (e) {
-          console.warn('Playback error on user gesture:', e);
-        }
+        this.audioClock.audio.currentTime = 0;
       }
+      this.audioClock.seek(0);
+      try {
+        await this.audioClock.play();
+      } catch (err) {
+        console.warn('Audio play error:', err);
+      }
+
+      // Launch continuous animation loop
+      this._startLoop();
     };
 
-    // Listen on whole window for first interaction
-    ['pointerdown', 'keydown', 'touchstart', 'click'].forEach(evt => {
-      window.addEventListener(evt, activateSound, { passive: true });
-    });
+    const overlay = document.getElementById('start-overlay');
+    if (overlay) {
+      overlay.addEventListener('click', startExperience);
+      overlay.addEventListener('touchstart', startExperience, { passive: true });
+    }
 
-    // Attempt autoplay immediately
-    this.audioClock.play().then((unmuted) => {
-      if (!unmuted) {
-        this._showSoundPrompt(activateSound);
+    // Also start if user taps or presses any key anywhere
+    window.addEventListener('pointerdown', startExperience, { once: true, passive: true });
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' || e.code === 'Enter' || e.code === 'Tab') {
+        e.preventDefault();
       }
-    }).catch(() => {
-      this._showSoundPrompt(activateSound);
-    });
-  }
-
-  _showSoundPrompt(activateSound) {
-    if (document.getElementById('sound-notice')) return;
-    const banner = document.createElement('div');
-    banner.id = 'sound-notice';
-    banner.className = 'sound-notice';
-    banner.textContent = '🔊 Click anywhere for sound';
-    banner.addEventListener('click', (e) => {
-      e.stopPropagation();
-      activateSound();
-    });
-    document.body.appendChild(banner);
+      startExperience();
+    }, { once: true });
   }
 
   _startLoop() {
     const loop = () => {
+      if (!this.isStarted) return;
+
       // Master audio clock time
       let time = this.audioClock.currentTime;
 
@@ -89,16 +109,7 @@ export class AnimationController {
         time = 0;
       }
 
-      const scene = getSceneAtTime(time);
-
-      // Render frame
-      this.renderer.render(
-        scene,
-        time,
-        this.characters,
-        this.typography,
-        this.effects
-      );
+      this._renderAtTime(time);
 
       requestAnimationFrame(loop);
     };
@@ -119,4 +130,3 @@ if (document.readyState === 'loading') {
 } else {
   start();
 }
-

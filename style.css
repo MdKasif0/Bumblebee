@@ -83,38 +83,68 @@ body {
   border-width: 0;
 }
 
-/* Transient sound unlock indicator (only displayed if browser blocks unmuted audio on load) */
-.sound-notice {
+/* Translucent Start Overlay */
+.start-overlay {
   position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(14, 21, 36, 0.9);
-  color: #a6cce6;
-  border: 1px solid rgba(166, 204, 230, 0.35);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
-  padding: 8px 18px;
-  border-radius: 9999px;
-  font-family: monospace;
-  font-size: 13px;
-  letter-spacing: 0.06em;
-  pointer-events: auto;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 10, 15, 0.58);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   cursor: pointer;
   z-index: 1000;
-  backdrop-filter: blur(8px);
-  animation: pulse-notice 2s infinite ease-in-out;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s;
+  user-select: none;
 }
 
-@keyframes pulse-notice {
+.start-overlay.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.start-prompt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.15rem 2.4rem;
+  background: rgba(14, 21, 36, 0.88);
+  border: 1px solid rgba(166, 204, 230, 0.45);
+  box-shadow: 
+    0 12px 36px rgba(0, 0, 0, 0.65),
+    0 0 24px rgba(166, 204, 230, 0.18),
+    inset 0 0 16px rgba(166, 204, 230, 0.08);
+  border-radius: 9999px;
+  color: #a6cce6;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(1.05rem, 2.8vw, 1.4rem);
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  animation: pulse-start 1.8s infinite ease-in-out;
+}
+
+@keyframes pulse-start {
   0%, 100% {
-    opacity: 0.95;
-    transform: translateX(-50%) scale(1);
+    transform: scale(1);
+    box-shadow: 
+      0 12px 36px rgba(0, 0, 0, 0.65),
+      0 0 18px rgba(166, 204, 230, 0.2);
+    border-color: rgba(166, 204, 230, 0.4);
   }
   50% {
-    opacity: 0.7;
-    transform: translateX(-50%) scale(0.98);
+    transform: scale(1.04);
+    box-shadow: 
+      0 16px 44px rgba(0, 0, 0, 0.8),
+      0 0 32px rgba(166, 204, 230, 0.5);
+    border-color: rgba(166, 204, 230, 0.8);
   }
 }
+
 
 
