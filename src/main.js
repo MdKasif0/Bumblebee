@@ -31,27 +31,50 @@ export class AnimationController {
   _initAutoplay() {
     this.audioClock.setLoop(true);
 
-    // Attempt unmuted or muted autoplay immediately on page load
-    this.audioClock.play().catch(() => {});
+    const activateSound = async () => {
+      const notice = document.getElementById('sound-notice');
+      if (notice) {
+        notice.style.opacity = '0';
+        setTimeout(() => notice.remove(), 300);
+      }
 
-    // Technical fallback for browser autoplay policy:
-    // If audio started in muted mode, seamlessly restore sound on the very first
-    // touch, click, or keypress anywhere on the window.
-    const unlockAudio = async () => {
       if (this.audioClock.audio) {
-        if (this.audioClock.audio.muted) {
-          this.audioClock.audio.muted = false;
-        }
-        if (this.audioClock.audio.paused) {
-          this.audioClock.audio.currentTime = this.audioClock.currentTime;
-          await this.audioClock.audio.play().catch(() => {});
+        this.audioClock.audio.muted = false;
+        this.audioClock.audio.volume = 1.0;
+        try {
+          await this.audioClock.audio.play();
+        } catch (e) {
+          console.warn('Playback error on user gesture:', e);
         }
       }
     };
 
+    // Listen on whole window for first interaction
     ['pointerdown', 'keydown', 'touchstart', 'click'].forEach(evt => {
-      window.addEventListener(evt, unlockAudio, { once: true, passive: true });
+      window.addEventListener(evt, activateSound, { passive: true });
     });
+
+    // Attempt autoplay immediately
+    this.audioClock.play().then((unmuted) => {
+      if (!unmuted) {
+        this._showSoundPrompt(activateSound);
+      }
+    }).catch(() => {
+      this._showSoundPrompt(activateSound);
+    });
+  }
+
+  _showSoundPrompt(activateSound) {
+    if (document.getElementById('sound-notice')) return;
+    const banner = document.createElement('div');
+    banner.id = 'sound-notice';
+    banner.className = 'sound-notice';
+    banner.textContent = '🔊 Click anywhere for sound';
+    banner.addEventListener('click', (e) => {
+      e.stopPropagation();
+      activateSound();
+    });
+    document.body.appendChild(banner);
   }
 
   _startLoop() {
