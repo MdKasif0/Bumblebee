@@ -4,12 +4,12 @@
  * CharacterRenderer, EffectsRenderer, and UI interactions.
  */
 
-import { AudioClock } from './audio.js';
-import { TIMELINE, getSceneAtTime, getSceneIndexAtTime } from './timeline.js';
-import { SceneRenderer } from './renderer.js';
-import { PixelTypography } from './typography.js';
-import { CharacterRenderer } from './characters.js';
-import { EffectsRenderer } from './effects.js';
+import { AudioClock } from './audio.js?v=5.1';
+import { TIMELINE, getSceneAtTime, getSceneIndexAtTime } from './timeline.js?v=5.1';
+import { SceneRenderer } from './renderer.js?v=5.1';
+import { PixelTypography } from './typography.js?v=5.1';
+import { CharacterRenderer } from './characters.js?v=5.1';
+import { EffectsRenderer } from './effects.js?v=5.1';
 
 export class AnimationController {
   constructor() {
