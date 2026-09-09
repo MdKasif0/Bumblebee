@@ -83,3 +83,38 @@ body {
   border-width: 0;
 }
 
+/* Transient sound unlock indicator (only displayed if browser blocks unmuted audio on load) */
+.sound-notice {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(14, 21, 36, 0.9);
+  color: #a6cce6;
+  border: 1px solid rgba(166, 204, 230, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  padding: 8px 18px;
+  border-radius: 9999px;
+  font-family: monospace;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+  animation: pulse-notice 2s infinite ease-in-out;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+@keyframes pulse-notice {
+  0%, 100% {
+    opacity: 0.95;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateX(-50%) scale(0.98);
+  }
+}
+
+
