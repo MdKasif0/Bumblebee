@@ -100,3 +100,10 @@ It's completely static, so you can drop it onto:
 ## disclaimer & credits
 
 Created as a visual tribute and technical recreation of the beloved Bumblebee animated short. All audio and original character concepts belong to their respective original creators. Recreated purely out of passion for retro LCD aesthetics and programmatic graphics.
+
+---
+
+## license
+
+This project is open source and available under the [MIT License](LICENSE).
+
