@@ -85,6 +85,12 @@ export class AnimationController {
       overlay.addEventListener('touchstart', startExperience, { passive: true });
     }
 
+    const githubBtn = document.querySelector('.github-corner-btn');
+    if (githubBtn) {
+      githubBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+      githubBtn.addEventListener('click', (e) => e.stopPropagation());
+    }
+
     // Also start if user taps or presses any key anywhere
     window.addEventListener('pointerdown', startExperience, { once: true, passive: true });
     window.addEventListener('keydown', (e) => {
