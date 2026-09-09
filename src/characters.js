@@ -678,6 +678,15 @@ export class CharacterRenderer {
     // Wide close-up head contour
     this.drawCatHeadContour(ctx, variant);
 
+    // Forehead tufts between ears
+    ctx.beginPath();
+    ctx.moveTo(-4, 0);
+    ctx.lineTo(-2, -2);
+    ctx.lineTo(0, 1);
+    ctx.lineTo(2, -2);
+    ctx.lineTo(4, 0);
+    ctx.stroke();
+
     // Cute curved eyebrows above huge eyes
     ctx.beginPath();
     ctx.arc(-8, 1, 5, Math.PI * 1.1, Math.PI * 1.8);
@@ -716,6 +725,21 @@ export class CharacterRenderer {
 
     // Head contour
     this.drawCatHeadContour(ctx, variant);
+
+    // Forehead tufts between ears
+    ctx.beginPath();
+    ctx.moveTo(-4, 0);
+    ctx.lineTo(-2, -2);
+    ctx.lineTo(0, 1);
+    ctx.lineTo(2, -2);
+    ctx.lineTo(4, 0);
+    ctx.stroke();
+
+    // Tabby cheek stripes
+    ctx.fillRect(-16, 3, 3, 1);
+    ctx.fillRect(-17, 6, 4, 1);
+    ctx.fillRect(13, 3, 3, 1);
+    ctx.fillRect(13, 6, 4, 1);
 
     // Eyebrows
     ctx.beginPath();
@@ -759,6 +783,21 @@ export class CharacterRenderer {
     // Head contour
     this.drawCatHeadContour(ctx, variant);
 
+    // Forehead tufts between ears
+    ctx.beginPath();
+    ctx.moveTo(-4, 0);
+    ctx.lineTo(-2, -2);
+    ctx.lineTo(0, 1);
+    ctx.lineTo(2, -2);
+    ctx.lineTo(4, 0);
+    ctx.stroke();
+
+    // Tabby cheek stripes
+    ctx.fillRect(-16, 3, 3, 1);
+    ctx.fillRect(-17, 6, 4, 1);
+    ctx.fillRect(13, 3, 3, 1);
+    ctx.fillRect(13, 6, 4, 1);
+
     // Eyebrows
     ctx.beginPath();
     ctx.arc(-8, 1, 5, Math.PI * 1.1, Math.PI * 1.8);
@@ -778,38 +817,51 @@ export class CharacterRenderer {
     ctx.closePath();
     ctx.stroke();
 
-    // Whiskers
-    this.drawCatWhiskers(ctx, variant, 3);
+    // Small mouth line
+    ctx.beginPath();
+    ctx.moveTo(0, 11);
+    ctx.lineTo(0, 13);
+    ctx.stroke();
+
+    // Left Whiskers
+    ctx.beginPath();
+    ctx.moveTo(-16, 5); ctx.lineTo(-22, 3);
+    ctx.moveTo(-16, 8); ctx.lineTo(-23, 8);
+    ctx.moveTo(-16, 11); ctx.lineTo(-21, 13);
+    ctx.stroke();
 
     // Left paw on bezel
     ctx.beginPath();
     ctx.ellipse(-10, 14, 3, 2, 0, 0, Math.PI * 2);
     ctx.stroke();
 
-    // Right Waving Paw (3 stepped wave positions: left tilt, upright, right tilt)
+    // Right Waving Paw beside right cheek (3 stepped wave angles)
     const waveFrame = Math.floor(tick / 2) % 3;
-    const waveAngle = (waveFrame === 0) ? -0.3 : (waveFrame === 1 ? 0 : 0.35);
+    const waveAngle = (waveFrame === 0) ? -0.15 : (waveFrame === 1 ? 0.05 : 0.25);
 
     ctx.save();
-    ctx.translate(12, 11);
+    ctx.translate(19, 13);
     ctx.rotate(waveAngle);
 
-    // Paw arm stem
+    // Paw arm stem rising up
     ctx.beginPath();
-    ctx.moveTo(-2, 4);
-    ctx.lineTo(-2, -4);
-    ctx.lineTo(2, -4);
-    ctx.lineTo(2, 4);
+    ctx.moveTo(-2, 2);
+    ctx.lineTo(-2, -6);
+    ctx.lineTo(2, -6);
+    ctx.lineTo(2, 2);
     ctx.stroke();
 
-    // Paw pad with claw/finger ticks
+    // Paw pad with 3 horizontal claw ticks pointing right
     ctx.beginPath();
-    ctx.arc(0, -5, 3.5, 0, Math.PI * 2);
+    ctx.arc(0, -7, 3, 0, Math.PI * 2);
     ctx.stroke();
-    ctx.fillRect(-2, -9, 1, 2);
-    ctx.fillRect(0, -9.5, 1, 2);
-    ctx.fillRect(2, -9, 1, 2);
+    ctx.fillRect(2, -9, 3, 1);
+    ctx.fillRect(2, -7, 4, 1);
+    ctx.fillRect(2, -5, 3, 1);
 
+    // Motion lines outside waving paw
+    ctx.fillRect(7, -8, 3, 1);
+    ctx.fillRect(7, -5, 3, 1);
     ctx.restore();
 
     ctx.restore();
