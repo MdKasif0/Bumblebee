@@ -44,7 +44,7 @@ export const timeline = [
     "endFrame": 60,
     "scene": "My Heart Skips A Beat",
     "name": "My Heart Skips A Beat",
-    "lyric": "MY HEART SKIPS\\nA BEAT",
+    "lyric": "MY HEART SKIPS\nA BEAT",
     "characterType": "cute_cat",
     "characterPose": "peek_glossy",
     "characterPosition": {
@@ -73,7 +73,7 @@ export const timeline = [
     "endFrame": 111,
     "scene": "When You Walk In The Room",
     "name": "When You Walk In The Room",
-    "lyric": "WHEN YOU WALK IN THE\\nROOM",
+    "lyric": "WHEN YOU WALK IN THE\nROOM",
     "characterType": "walking_cat",
     "characterPose": "walk_angled",
     "characterPosition": {
@@ -363,7 +363,7 @@ export const timeline = [
     "endFrame": 254,
     "scene": "You're My Playboy",
     "name": "You're My Playboy",
-    "lyric": "YOU'RE MY\\nPLAYBOY",
+    "lyric": "YOU'RE MY\nPLAYBOY",
     "characterType": "round_eyed_nerd",
     "characterPose": "nerd_surprised",
     "characterPosition": {
@@ -450,7 +450,7 @@ export const timeline = [
     "endFrame": 372,
     "scene": "I Wanna Be With You",
     "name": "I Wanna Be With You",
-    "lyric": "I WANNA BE WITH\\nYOU",
+    "lyric": "I WANNA BE WITH\nYOU",
     "characterType": "tomato_cat_duo",
     "characterPose": "singing_duo",
     "characterPosition": {
@@ -566,7 +566,7 @@ export const timeline = [
     "endFrame": 643,
     "scene": "To Make You See It's True",
     "name": "To Make You See It's True",
-    "lyric": "TO MAKE YOU SEE IT'S\\nTRUE",
+    "lyric": "TO MAKE YOU SEE IT'S\nTRUE",
     "characterType": "knife_cat",
     "characterPose": "cat_knife_up",
     "characterPosition": {
@@ -653,7 +653,7 @@ export const timeline = [
     "endFrame": 856,
     "scene": "Please Come Rescue Me",
     "name": "Please Come Rescue Me",
-    "lyric": "PLEASE COME RESCUE\\nME",
+    "lyric": "PLEASE COME RESCUE\nME",
     "characterType": "cute_cat",
     "characterPose": "cat_crying",
     "characterPosition": {

@@ -432,7 +432,7 @@ export class PixelTypography {
    */
   measureText(text, scale = 1, isHeavy = false) {
     if (!text) return { width: 0, height: 0 };
-    const lines = text.toUpperCase().split('\n');
+    const lines = text.toUpperCase().replace(/\\n/g, '\n').split('\n');
     let maxWidth = 0;
     const font = isHeavy ? GLYPHS_HEAVY_BLOCK : LCD_GLYPHS;
     const defaultGlyph = isHeavy ? GLYPHS_HEAVY_BLOCK[' '] : LCD_GLYPHS[' '];
@@ -474,7 +474,7 @@ export class PixelTypography {
     const applyJitter = options.applyJitter !== false;
     const tick = options.tick !== undefined ? options.tick : (options.time ? Math.floor(options.time * 6) : 0);
 
-    const lines = text.toUpperCase().split('\n');
+    const lines = text.toUpperCase().replace(/\\n/g, '\n').split('\n');
     ctx.fillStyle = color;
 
     const font = isHeavy ? GLYPHS_HEAVY_BLOCK : LCD_GLYPHS;
