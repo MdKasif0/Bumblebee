@@ -73,7 +73,9 @@ export class SceneRenderer {
           scale: scene.textScale || 1.0,
           align: scene.textPosition.align || 'center',
           color: ink,
-          isHeavy
+          isHeavy,
+          time,
+          tick: Math.floor(time * 12)
         }
       );
     }
