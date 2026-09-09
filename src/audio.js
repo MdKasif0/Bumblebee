@@ -131,9 +131,10 @@ export class AudioClock {
   async play() {
     if (this.audio && !this.isFallback && !this.audio.error) {
       try {
+        this.audio.muted = false;
         await this.audio.play();
         this.simulatedPlaying = false;
-        this._emit('play');
+        this._emit('play', { unmuted: true });
         return true;
       } catch (err) {
         console.warn('Unmuted audio play blocked by browser policy. Falling back to muted autoplay:', err);
@@ -141,20 +142,20 @@ export class AudioClock {
           this.audio.muted = true;
           await this.audio.play();
           this.simulatedPlaying = false;
-          this._emit('play');
-          return true;
+          this._emit('play', { unmuted: false });
+          return false;
         } catch (mutedErr) {
           console.warn('Muted autoplay deferred, running simulated high-precision clock:', mutedErr);
           this.simulatedPlaying = true;
           this.lastFallbackTimestamp = performance.now();
-          this._emit('play');
+          this._emit('play', { unmuted: false });
           return false;
         }
       }
     } else {
       this.simulatedPlaying = true;
       this.lastFallbackTimestamp = performance.now();
-      this._emit('play');
+      this._emit('play', { unmuted: false });
       return true;
     }
   }
