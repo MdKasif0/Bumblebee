@@ -49,7 +49,7 @@ export const TIMELINE = [
     startTime: 2.000,
     endTime: 3.700,
     lyric: 'WHEN YOU WALK IN THE\nROOM',
-    textPosition: { x: 64, y: 11, align: 'center' },
+    textPosition: { x: 64, y: 7, align: 'center' },
     textSize: 'normal',
     textScale: 1.0,
     characterType: 'walking_cat',

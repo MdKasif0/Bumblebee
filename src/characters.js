@@ -1140,9 +1140,9 @@ export class CharacterRenderer {
       this.drawPoseF_CryingCat(ctx, cx, cy, scale, variant, tick);
     } else if (pose === 'starry_eyes' || pose === 'cat_sparkle_close') {
       this.drawPoseF_StarryCloseUpCat(ctx, cx, cy, scale, variant, tick);
-    } else if (pose === 'joyful_beam' || pose === 'cat_close_up') {
+    } else if (pose === 'joyful_beam' || pose === 'cat_close_up' || pose === 'cat_smile_close') {
       this.drawPoseF_JoyfulCat(ctx, cx, cy, scale, variant, tick);
-    } else if (pose === 'paw_wave' || pose === 'cat_paw_wave') {
+    } else if (pose === 'paw_wave' || pose === 'cat_paw_wave' || pose === 'cat_wave_close') {
       this.drawPoseF_WavingPawCat(ctx, cx, cy, scale, variant, tick);
     } else {
       this.drawPoseB_PeekingCat(ctx, cx, cy, scale, 'glossy', variant, tick);
