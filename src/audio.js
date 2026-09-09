@@ -77,6 +77,9 @@ export class AudioClock {
    */
   get currentTime() {
     if (this.audio && !this.isFallback && !this.audio.error) {
+      if (this.audio.paused && this.fallbackTime !== undefined) {
+        return this.fallbackTime;
+      }
       return this.audio.currentTime;
     }
     if (this.simulatedPlaying && this.lastFallbackTimestamp !== null) {
@@ -94,11 +97,15 @@ export class AudioClock {
 
   set currentTime(time) {
     const clamped = Math.max(0, Math.min(this.duration, time));
-    if (this.audio && !this.isFallback && !this.audio.error) {
-      this.audio.currentTime = clamped;
-    }
     this.fallbackTime = clamped;
     this.lastFallbackTimestamp = performance.now();
+    if (this.audio && !this.isFallback && !this.audio.error) {
+      try {
+        this.audio.currentTime = clamped;
+      } catch (e) {
+        // Ignored if audio element is not yet interactive
+      }
+    }
     this._emit('seek', clamped);
   }
 
