@@ -85,7 +85,7 @@ export class AudioClock {
    * Directly driven by audio.currentTime with zero drift.
    */
   get currentTime() {
-    if (this.audio && !this.isFallback && !this.audio.error) {
+    if (this.audio && !this.isFallback && !this.audio.error && !this.audio.paused) {
       return this.audio.currentTime;
     }
     if (this.simulatedPlaying && this.lastFallbackTimestamp !== null) {
@@ -102,8 +102,9 @@ export class AudioClock {
           this._emit('ended');
         }
       }
+      return this.fallbackTime;
     }
-    return this.fallbackTime;
+    return this.audio ? this.audio.currentTime : this.fallbackTime;
   }
 
   set currentTime(time) {
@@ -131,13 +132,24 @@ export class AudioClock {
     if (this.audio && !this.isFallback && !this.audio.error) {
       try {
         await this.audio.play();
+        this.simulatedPlaying = false;
+        this._emit('play');
         return true;
       } catch (err) {
-        console.warn('Audio play request blocked by browser policy, falling back to simulated clock until user gesture:', err);
-        this.simulatedPlaying = true;
-        this.lastFallbackTimestamp = performance.now();
-        this._emit('play');
-        return false;
+        console.warn('Unmuted audio play blocked by browser policy. Falling back to muted autoplay:', err);
+        try {
+          this.audio.muted = true;
+          await this.audio.play();
+          this.simulatedPlaying = false;
+          this._emit('play');
+          return true;
+        } catch (mutedErr) {
+          console.warn('Muted autoplay deferred, running simulated high-precision clock:', mutedErr);
+          this.simulatedPlaying = true;
+          this.lastFallbackTimestamp = performance.now();
+          this._emit('play');
+          return false;
+        }
       }
     } else {
       this.simulatedPlaying = true;

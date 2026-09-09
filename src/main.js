@@ -31,22 +31,27 @@ export class AnimationController {
   _initAutoplay() {
     this.audioClock.setLoop(true);
 
-    // Attempt unmuted audio autoplay immediately on load
+    // Attempt unmuted or muted autoplay immediately on page load
     this.audioClock.play().catch(() => {});
 
-    // Technical fallback for browser autoplay restrictions:
-    // If unmuted autoplay is deferred by browser security policy, seamlessly start audio
-    // on the very first user interaction anywhere on the window without displaying any UI.
-    const unlockAudio = () => {
-      if (this.audioClock.audio && this.audioClock.audio.paused) {
-        this.audioClock.seek(this.audioClock.currentTime);
-        this.audioClock.play().catch(() => {});
+    // Technical fallback for browser autoplay policy:
+    // If audio started in muted mode, seamlessly restore sound on the very first
+    // touch, click, or keypress anywhere on the window.
+    const unlockAudio = async () => {
+      if (this.audioClock.audio) {
+        if (this.audioClock.audio.muted) {
+          this.audioClock.audio.muted = false;
+        }
+        if (this.audioClock.audio.paused) {
+          this.audioClock.audio.currentTime = this.audioClock.currentTime;
+          await this.audioClock.audio.play().catch(() => {});
+        }
       }
     };
 
-    window.addEventListener('pointerdown', unlockAudio, { once: true, passive: true });
-    window.addEventListener('keydown', unlockAudio, { once: true, passive: true });
-    window.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
+    ['pointerdown', 'keydown', 'touchstart', 'click'].forEach(evt => {
+      window.addEventListener(evt, unlockAudio, { once: true, passive: true });
+    });
   }
 
   _startLoop() {
@@ -79,7 +84,16 @@ export class AnimationController {
   }
 }
 
-// Instantiate AnimationController when DOM is ready
-window.addEventListener('DOMContentLoaded', () => {
-  window.animationController = new AnimationController();
-});
+// Start immediately or when DOM is ready
+function start() {
+  if (!window.animationController) {
+    window.animationController = new AnimationController();
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', start);
+} else {
+  start();
+}
+
