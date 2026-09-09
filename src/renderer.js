@@ -51,14 +51,14 @@ export class SceneRenderer {
    */
   render(scene, time, characters, typography, effects) {
     const octx = this.offscreenCtx;
-    const { ink } = effects.getColors();
+    const { ink, bg } = effects.getColors();
 
     // 1. Layer: Background
     effects.drawBackground(octx, this.LOGICAL_WIDTH, this.LOGICAL_HEIGHT);
 
     // 2. Layer: Character Procedural Artwork
     if (characters && scene) {
-      characters.render(octx, scene, time, ink);
+      characters.render(octx, scene, time, ink, bg);
     }
 
     // 3. Layer: Bitmap Typography

@@ -49,8 +49,7 @@ export class AnimationController {
       speedSelect: document.getElementById('speed-select'),
       btnMute: document.getElementById('btn-mute'),
       muteIcon: document.getElementById('mute-icon'),
-      btnFullscreen: document.getElementById('btn-fullscreen'),
-      pcbBoard: document.getElementById('pcb-board')
+      btnFullscreen: document.getElementById('btn-fullscreen')
     };
 
     this._initUI();

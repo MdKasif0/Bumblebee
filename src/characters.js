@@ -24,8 +24,9 @@ export class CharacterRenderer {
   /**
    * Main render dispatch for the current active scene.
    */
-  render(ctx, scene, time, inkColor = this.defaultInk) {
+  render(ctx, scene, time, inkColor = this.defaultInk, bgColor = '#a6cce6') {
     if (!scene || !scene.characterType) return;
+    this.activeBg = bgColor;
 
     ctx.save();
     ctx.strokeStyle = inkColor;
@@ -240,7 +241,7 @@ export class CharacterRenderer {
     ctx.beginPath();
     ctx.ellipse(0, -3, 2, 2.5, -0.2, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = '#a8cde5';
+    ctx.fillStyle = this.activeBg || '#a6cce6';
     ctx.fillRect(-0.5, -4, 1, 1); // white glint cutout
     ctx.fillStyle = ctx.strokeStyle;
 
@@ -819,9 +820,11 @@ export class CharacterRenderer {
   // =========================================================================
   drawSpikyCreature(ctx, cx, cy, scale, pose, variant, tick) {
     let joltX = 0;
-    if (pose === 'look_left') joltX = -3;
-    else if (pose === 'look_right') joltX = 3;
-    else if (pose === 'centered_jolt') joltX = (tick % 2 === 0) ? -1 : 1;
+    const isLeft = (pose === 'look_left' || pose === 'spiky_look_left');
+    const isRight = (pose === 'look_right' || pose === 'spiky_look_right');
+    if (isLeft) joltX = -3;
+    else if (isRight) joltX = 3;
+    else joltX = (tick % 2 === 0) ? -1 : 1;
 
     ctx.save();
     ctx.translate(cx + joltX, cy);
@@ -831,9 +834,9 @@ export class CharacterRenderer {
     this.drawJaggedBurstOutline(ctx, variant);
 
     // Eyes peeking out from underneath the spiky energy burst
-    if (pose === 'look_left') {
+    if (isLeft) {
       this.drawAlertEyes(ctx, -2, variant);
-    } else if (pose === 'look_right') {
+    } else if (isRight) {
       this.drawAlertEyes(ctx, 2, variant);
     } else {
       this.drawAlertEyes(ctx, 0, variant);
@@ -1117,29 +1120,29 @@ export class CharacterRenderer {
   // CAT POSE DISPATCHER HELPER
   // =========================================================================
   renderCatPose(ctx, cx, cy, scale, pose, movement, variant, tick, progress) {
-    if (pose === 'peek_glossy') {
+    if (pose === 'peek_glossy' || pose === 'peek_small') {
       this.drawPoseB_PeekingCat(ctx, cx, cy, scale, 'glossy', variant, tick);
-    } else if (pose === 'look_left') {
+    } else if (pose === 'look_left' || pose === 'peek_look_left') {
       this.drawPoseE_UnderText(ctx, cx, cy, scale, 'left', variant, tick);
-    } else if (pose === 'look_right') {
+    } else if (pose === 'look_right' || pose === 'peek_look_right') {
       this.drawPoseE_UnderText(ctx, cx, cy, scale, 'right', variant, tick);
-    } else if (pose === 'alert_shake') {
+    } else if (pose === 'alert_shake' || pose === 'peek_shock') {
       this.drawPoseE_UnderText(ctx, cx, cy, scale, 'shake', variant, tick);
-    } else if (pose === 'wink') {
+    } else if (pose === 'wink' || pose === 'cat_wink') {
       this.drawPoseB_PeekingCat(ctx, cx, cy, scale, 'wink', variant, tick);
-    } else if (pose === 'smug') {
+    } else if (pose === 'smug' || pose === 'cat_smug') {
       this.drawPoseB_PeekingCat(ctx, cx, cy, scale, 'smug', variant, tick);
-    } else if (pose === 'confused_sweat') {
+    } else if (pose === 'confused_sweat' || pose === 'cat_confused_sweat') {
       this.drawPoseF_ConfusedCat(ctx, cx, cy, scale, variant, tick);
-    } else if (pose === 'hypno_spiral') {
+    } else if (pose === 'hypno_spiral' || pose === 'cat_hypnotized') {
       this.drawPoseF_HypnoCat(ctx, cx, cy, scale, variant, tick);
-    } else if (pose === 'crying_plead') {
+    } else if (pose === 'crying_plead' || pose === 'cat_crying') {
       this.drawPoseF_CryingCat(ctx, cx, cy, scale, variant, tick);
-    } else if (pose === 'starry_eyes') {
+    } else if (pose === 'starry_eyes' || pose === 'cat_sparkle_close') {
       this.drawPoseF_StarryCloseUpCat(ctx, cx, cy, scale, variant, tick);
-    } else if (pose === 'joyful_beam') {
+    } else if (pose === 'joyful_beam' || pose === 'cat_close_up') {
       this.drawPoseF_JoyfulCat(ctx, cx, cy, scale, variant, tick);
-    } else if (pose === 'paw_wave') {
+    } else if (pose === 'paw_wave' || pose === 'cat_paw_wave') {
       this.drawPoseF_WavingPawCat(ctx, cx, cy, scale, variant, tick);
     } else {
       this.drawPoseB_PeekingCat(ctx, cx, cy, scale, 'glossy', variant, tick);
@@ -1194,7 +1197,7 @@ export class CharacterRenderer {
   drawGlossyEyes(ctx, leftX, rightX, lookDirX = 0, variant = 0) {
     const y = 8;
     const radius = 4.5;
-    const bgPixel = '#a8cde5'; // Cutout color to make specular highlights
+    const bgPixel = this.activeBg || '#a6cce6'; // Cutout color to make specular highlights
 
     // Left Eye
     ctx.beginPath();
@@ -1224,7 +1227,7 @@ export class CharacterRenderer {
 
   // Giant Starry Eyes (Scene 24)
   drawStarryEyes(ctx, leftX, rightX, eyeY = 8, radius = 5, variant = 0) {
-    const bgPixel = '#a8cde5';
+    const bgPixel = this.activeBg || '#a6cce6';
 
     // Left eye filled
     ctx.beginPath();
