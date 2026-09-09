@@ -20,18 +20,6 @@ So here we are.
 
 ---
 
-## the brag sheet
-
-- **Zero Image Files**: Literally not a single PNG, JPEG, SVG, or GIF was used in this project. If you inspect the network tab, the only thing downloaded is one audio track and some JavaScript. Every eyeball, whisker, mouth frame, tear drop, and text character is generated on the fly.
-- **128 × 64 Logical Grid**: The entire world runs inside an authentic 128×64 dot-matrix coordinate space (the exact resolution of classic SSD1306 OLED / LCD displays) and scales up to whatever giant monitor you're using without losing its retro soul.
-- **Banned the Blur**: Browsers love smoothing out pixels with antialiasing. We took that personally. A custom 1-bit monochrome quantization pass forcibly snaps every pixel to pure solid ink or pure LCD background. Zero blur. Zero gray edges. Razor sharp.
-- **The Audio is the Boss**: The animation does not use a random interval timer that drifts out of sync after 10 seconds. The visual engine is a slave to `audio.currentTime`. Where the song goes, the cat follows.
-- **26 Precise Timeline Scenes**: Hand-timed scene cuts matching every lyric change, pose shift, and bounce from `0.00s` to `31.87s`.
-- **Fullscreen & UI-Free**: No headers. No progress bars. No pause buttons. No menus. When the page opens, it takes over your viewport in a clean 2:1 aspect ratio and loops into eternity.
-- **0 Dependencies**: No React. No Vite. No Tailwind. No 500MB `node_modules` black hole. Just vanilla web standards running at a crisp 60 FPS.
-
----
-
 ## completely necessary charts & statistical analysis 📊
 
 ### 1. why did we do this?
@@ -99,6 +87,17 @@ gitGraph
     commit id: "9. infinite fullscreen loop forever"
 ```
 
+---
+
+## the brag sheet
+
+- **Zero Image Files**: Literally not a single PNG, JPEG, SVG, or GIF was used in this project. If you inspect the network tab, the only thing downloaded is one audio track and some JavaScript. Every eyeball, whisker, mouth frame, tear drop, and text character is generated on the fly.
+- **128 × 64 Logical Grid**: The entire world runs inside an authentic 128×64 dot-matrix coordinate space (the exact resolution of classic SSD1306 OLED / LCD displays) and scales up to whatever giant monitor you're using without losing its retro soul.
+- **Banned the Blur**: Browsers love smoothing out pixels with antialiasing. We took that personally. A custom 1-bit monochrome quantization pass forcibly snaps every pixel to pure solid ink or pure LCD background. Zero blur. Zero gray edges. Razor sharp.
+- **The Audio is the Boss**: The animation does not use a random interval timer that drifts out of sync after 10 seconds. The visual engine is a slave to `audio.currentTime`. Where the song goes, the cat follows.
+- **26 Precise Timeline Scenes**: Hand-timed scene cuts matching every lyric change, pose shift, and bounce from `0.00s` to `31.87s`.
+- **Fullscreen & UI-Free**: No headers. No progress bars. No pause buttons. No menus. When the page opens, it takes over your viewport in a clean 2:1 aspect ratio and loops into eternity.
+- **0 Dependencies**: No React. No Vite. No Tailwind. No 500MB `node_modules` black hole. Just vanilla web standards running at a crisp 60 FPS.
 
 ---
 
