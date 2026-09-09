@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bumblebee-lcd.netlify.app/sitemap.xml

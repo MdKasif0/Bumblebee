@@ -3,17 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bumblebee - LCD Animation Recreation</title>
-  <meta name="description" content="100% programmatic procedural recreation of the Bumblebee 128x64 LCD cartoon animation synchronized to master audio clock.">
+  
+  <!-- Primary Meta Tags -->
+  <title>Bumblebee LCD Animation | 100% Procedural Pixel Art Recreation</title>
+  <meta name="title" content="Bumblebee LCD Animation | 100% Procedural Pixel Art Recreation">
+  <meta name="description" content="A 100% programmatic, pixel-accurate web recreation of the iconic Bumblebee 128x64 monochrome LCD cartoon animation. Zero images, custom bitmap typography, and synchronized master audio looping in fullscreen.">
+  <meta name="keywords" content="Bumblebee animation, Bumblebee LCD recreation, procedural pixel art, 128x64 OLED, canvas animation, retro animation, SSD1306, chiptune cat, monospace pixel art, web animation">
+  <meta name="author" content="Md Kasif Uddin">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="theme-color" content="#080a0f">
+  <meta name="color-scheme" content="dark">
+  <link rel="canonical" href="https://bumblebee-lcd.netlify.app/">
+
+  <!-- Open Graph / Facebook / LinkedIn / Discord -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bumblebee-lcd.netlify.app/">
+  <meta property="og:title" content="Bumblebee LCD Animation | 100% Procedural Pixel Art Recreation">
+  <meta property="og:description" content="A 100% programmatic procedural recreation of the iconic Bumblebee 128x64 monochrome LCD cartoon animation with zero images and master audio clock synchronization.">
+  <meta property="og:site_name" content="Bumblebee LCD Recreation">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://bumblebee-lcd.netlify.app/">
+  <meta name="twitter:title" content="Bumblebee LCD Animation | 100% Procedural Pixel Art Recreation">
+  <meta name="twitter:description" content="Watch the iconic Bumblebee 128x64 LCD cartoon animation recreated purely in code with zero images, synchronized to audio in an infinite fullscreen loop.">
+
+  <!-- Favicon (Inline SVG LCD screen) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23080a0f'/><rect x='4' y='6' width='24' height='20' rx='2' fill='%23a6cce6'/><path d='M10 13h4v4h-4zm8 0h4v4h-4zm-5 6h6v2h-6z' fill='%230e1524'/></svg>">
+  
   <link rel="stylesheet" href="style.css">
+
+  <!-- Structured Data (JSON-LD Schema.org) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Bumblebee LCD Animation Recreation",
+    "alternateName": "Bumblebee 128x64 LCD Procedural Animation",
+    "url": "https://bumblebee-lcd.netlify.app/",
+    "description": "100% procedural pixel-accurate recreation of the iconic Bumblebee 128x64 monochrome LCD animation, synchronized to master audio in an infinite fullscreen loop.",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "Any",
+    "genre": "Pixel Art, Procedural Animation, Retro LCD, Chiptune",
+    "browserRequirements": "Requires HTML5 Canvas and Audio support",
+    "creator": {
+      "@type": "Person",
+      "name": "Md Kasif Uddin"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
 </head>
 <body>
-  <main class="animation-stage">
+  <!-- Semantic Heading Structure for SEO & Screen Readers (Visually Hidden) -->
+  <header class="sr-only">
+    <h1>Bumblebee LCD Animation — 100% Procedural Retro Pixel Art Recreation</h1>
+    <p>An interactive, zero-image recreation of the Bumblebee retro 128x64 monochrome LCD cartoon animation with real-time audio synchronization and infinite loop playback.</p>
+  </header>
+
+  <main class="animation-stage" role="region" aria-label="Bumblebee 128x64 LCD Animation Canvas">
     <!-- Active logical 128x64 display canvas -->
-    <canvas id="display-canvas" width="512" height="256"></canvas>
+    <canvas id="display-canvas" width="512" height="256" aria-label="Bumblebee animated cartoon pixel art on 128 by 64 LCD display"></canvas>
     <!-- Authentic subtle LCD dot matrix texture -->
-    <div class="lcd-pixel-grid-overlay" id="pixel-overlay"></div>
+    <div class="lcd-pixel-grid-overlay" id="pixel-overlay" aria-hidden="true"></div>
   </main>
+
+  <!-- Noscript fallback for non-JS crawlers -->
+  <noscript>
+    <div style="color: #a6cce6; text-align: center; padding: 2rem; font-family: monospace;">
+      <h2>Bumblebee LCD Recreation</h2>
+      <p>This animation is rendered dynamically using HTML5 Canvas and Web Audio. Please enable JavaScript to experience the full procedural animation.</p>
+    </div>
+  </noscript>
 
   <!-- Audio Element (master audio clock) -->
   <audio id="audio-master" preload="auto" playsinline autoplay>
