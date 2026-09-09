@@ -1,16 +1,28 @@
 /**
- * characters.js - Procedural Character Artwork Renderer.
- * Draws all character archetypes, poses, and animation cycles programmatically
- * onto the logical 128x64 canvas. Zero raster images or screenshots.
+ * characters.js - Component-Based Procedural Cartoon Art Reconstruction.
+ * 
+ * Recreates all characters, poses, and special graphics from scratch
+ * using Canvas 2D procedural paths. Zero video frames or screenshots.
+ * 
+ * Features:
+ * - Independent components: head, ears, eyes (dual-glint chibi & expressions),
+ *   nose, mouth, whiskers, body, legs, tail, and special props.
+ * - Controlled irregularities: asymmetric eyes, hand-drawn uneven curves,
+ *   crude primitive shapes.
+ * - 6 distinct constructed poses: POSE_A, POSE_B, POSE_C, POSE_D, POSE_E, POSE_F.
+ * - Special graphics: jagged explosion shape, 5-petal flower, kitchen knife,
+ *   crying tears, sweat marks, spiral eyes, starry glints, waving paw,
+ *   round-eyed nerd, and tomato friend.
+ * - Stepped 2-3 frame boil variants for authentic hand-drawn vibration.
  */
 
 export class CharacterRenderer {
   constructor() {
-    this.defaultInk = '#0e1422';
+    this.defaultInk = '#0e1524';
   }
 
   /**
-   * Main entry point to render the active character for a scene.
+   * Main render dispatch for the current active scene.
    */
   render(ctx, scene, time, inkColor = this.defaultInk) {
     if (!scene || !scene.characterType) return;
@@ -22,495 +34,962 @@ export class CharacterRenderer {
     ctx.lineCap = 'square';
     ctx.lineJoin = 'miter';
 
-    // Stepped time quantizer for authentic 12-15 fps mechanical OLED feel
-    const steppedTick = Math.floor(time * 15);
-    const sceneTime = time - scene.startTime;
-    const progress = Math.max(0, Math.min(1, sceneTime / (scene.endTime - scene.startTime)));
+    // Stepped frame tick (12-15 fps typical of vintage microcontroller I2C displays)
+    const steppedTick = Math.floor(time * 12);
+    const boilVariant = steppedTick % 3; // 3-frame hand-drawn boil cycle
+    const sceneTime = Math.max(0, time - scene.startTime);
+    const duration = scene.endTime - scene.startTime;
+    const progress = duration > 0 ? Math.min(1, sceneTime / duration) : 0;
 
     const { x, y } = scene.characterPosition;
     const scale = scene.characterScale || 1.0;
 
     switch (scene.characterType) {
       case 'hooded_figure':
-        this.drawHoodedFigure(ctx, x, y, scale, steppedTick);
+        // POSE_A: Pointed hood / wizard bee costume figure
+        this.drawPoseA_HoodedFigure(ctx, x, y, scale, boilVariant, steppedTick);
         break;
+
       case 'cute_cat':
-        this.drawCuteCat(ctx, x, y, scale, scene.characterPose, scene.movement, steppedTick, progress);
+        // Dispatches to POSE_B, POSE_E, or POSE_F based on scene.characterPose
+        this.renderCatPose(ctx, x, y, scale, scene.characterPose, scene.movement, boilVariant, steppedTick, progress);
         break;
+
       case 'walking_cat':
-        this.drawWalkingCat(ctx, x, y, scale, steppedTick, progress);
+        // POSE_C: Sideways walking cat with body, legs, and tail
+        this.drawPoseC_WalkingCat(ctx, x, y, scale, boilVariant, steppedTick, progress);
         break;
+
       case 'spiky_creature':
-        this.drawSpikyCreature(ctx, x, y, scale, scene.characterPose, steppedTick);
+        // Exaggerated jagged / explosion energy creature
+        this.drawSpikyCreature(ctx, x, y, scale, scene.characterPose, boilVariant, steppedTick);
         break;
+
       case 'round_eyed_nerd':
-        this.drawRoundEyedNerd(ctx, x, y, scale, scene.characterPose, steppedTick);
+        // Giant round-eyed spectacle character
+        this.drawRoundEyedNerd(ctx, x, y, scale, scene.characterPose, boilVariant, steppedTick);
         break;
+
       case 'cat_and_flower':
-        this.drawCatAndFlower(ctx, x, y, scale, steppedTick);
+        // Daisy flower + peeking cat
+        this.drawCatAndFlower(ctx, x, y, scale, boilVariant, steppedTick);
         break;
+
       case 'bouncing_duo':
-        this.drawBouncingDuo(ctx, x, y, scale, steppedTick);
+        // Two cats bouncing side-by-side
+        this.drawBouncingDuo(ctx, x, y, scale, boilVariant, steppedTick);
         break;
+
       case 'tomato_cat_duo':
-        this.drawTomatoCatDuo(ctx, x, y, scale, scene.characterPose, steppedTick);
+        // Eggplant/tomato companion + singing cat
+        this.drawTomatoCatDuo(ctx, x, y, scale, scene.characterPose, boilVariant, steppedTick);
         break;
+
       case 'knife_cat':
-        this.drawKnifeCat(ctx, x, y, scale, steppedTick, progress);
+        // POSE_F: Cat raising kitchen knife
+        this.drawPoseF_KnifeCat(ctx, x, y, scale, boilVariant, steppedTick, progress);
         break;
+
       default:
-        this.drawCuteCat(ctx, x, y, scale, 'peek_glossy', 'bounce_2frame', steppedTick, progress);
+        // Default to POSE_B Peeking Cat
+        this.drawPoseB_PeekingCat(ctx, x, y, scale, 'glossy', boilVariant, steppedTick);
         break;
     }
 
     ctx.restore();
   }
 
-  // --- 1. Scene 1: Hooded Pointed Bee Figure ---
-  drawHoodedFigure(ctx, cx, cy, scale, tick) {
+  // =========================================================================
+  // 1. POSE_A: INITIAL / STATIC POSE (Pointed Hood Wizard / Bee Figure)
+  // =========================================================================
+  drawPoseA_HoodedFigure(ctx, cx, cy, scale, variant, tick) {
     const bob = (tick % 4 < 2) ? 0 : 1;
+    const x = cx + ((variant === 1) ? 0.5 : 0);
     const y = cy + bob;
 
     ctx.save();
-    ctx.translate(cx, y);
+    ctx.translate(x, y);
     ctx.scale(scale, scale);
 
-    // Pointed hood cone
+    // Pom-pom / tassel at tip of hat
+    const pomJitter = (variant === 2) ? 1 : 0;
+    ctx.beginPath();
+    ctx.arc(0, -25 + pomJitter, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Tall pointed cone hat
     ctx.beginPath();
     ctx.moveTo(0, -22);
-    ctx.lineTo(12, 10);
+    // Asymmetric irregular cone sides
+    ctx.quadraticCurveTo(8 + (variant * 0.5), -5, 12, 10);
     ctx.lineTo(-12, 10);
-    ctx.closePath();
+    ctx.quadraticCurveTo(-8 - (variant * 0.5), -5, 0, -22);
     ctx.stroke();
 
-    // Head inner face outline
+    // Inner face oval
     ctx.beginPath();
-    ctx.ellipse(0, -3, 8, 8, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, -2, 7.5, 7, 0, 0, Math.PI * 2);
     ctx.stroke();
 
-    // Cross/sparkle eyes
-    ctx.fillRect(-4, -4, 2, 2);
-    ctx.fillRect(2, -4, 2, 2);
-    ctx.fillRect(-5, -3, 4, 1);
-    ctx.fillRect(1, -3, 4, 1);
+    // Cross / star sparkle eyes
+    // Left eye
+    ctx.fillRect(-4, -3, 2, 2);
+    ctx.fillRect(-5, -2.5, 4, 1);
+    ctx.fillRect(-3.5, -4, 1, 4);
 
-    // Body cloak
+    // Right eye
+    ctx.fillRect(3, -3, 2, 2);
+    ctx.fillRect(2, -2.5, 4, 1);
+    ctx.fillRect(3.5, -4, 1, 4);
+
+    // Tiny mouth/snout tick
+    ctx.fillRect(0, 1.5, 1, 1);
+
+    // Cloaked shoulders
     ctx.beginPath();
-    ctx.moveTo(-10, 10);
-    ctx.lineTo(-14, 24);
-    ctx.lineTo(14, 24);
-    ctx.lineTo(10, 10);
+    ctx.moveTo(-11, 10);
+    ctx.lineTo(-15, 23);
+    ctx.lineTo(15, 23);
+    ctx.lineTo(11, 10);
     ctx.stroke();
 
-    // Chest star emblem
-    this.drawStar(ctx, 0, 16, 3, 1.5);
+    // Chest star / bowtie emblem
+    this.drawStar(ctx, 0, 16, 3.5, 1.5);
     ctx.fill();
 
     ctx.restore();
   }
 
-  // --- 2. Cute Peeking Cat with Multiple Expressions ---
-  drawCuteCat(ctx, cx, cy, scale, pose, movement, tick, progress) {
-    let offsetY = 0;
-    let offsetX = 0;
-
-    if (movement === 'bounce_2frame') {
-      offsetY = (tick % 4 < 2) ? 0 : 2;
-    } else if (movement === 'shake_jolt') {
-      offsetX = (tick % 2 === 0) ? -1 : 1;
-      offsetY = (tick % 4 < 2) ? -1 : 0;
-    } else if (movement === 'snap_left') {
-      offsetX = -2;
-    } else if (movement === 'snap_right') {
-      offsetX = 2;
-    } else if (movement === 'paw_wave') {
-      offsetY = (tick % 4 < 2) ? 0 : 1;
-    }
-
-    const x = cx + offsetX;
-    const y = cy + offsetY;
+  // =========================================================================
+  // 2. POSE_B: CHARACTER APPEARING / RISING FROM BOTTOM (Peeking Cat)
+  // =========================================================================
+  drawPoseB_PeekingCat(ctx, cx, cy, scale, eyeStyle = 'glossy', variant = 0, tick = 0) {
+    const bob = (tick % 4 < 2) ? 0 : 1;
+    const x = cx;
+    const y = cy + bob;
 
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(scale, scale);
 
-    // Cat Head Outline
+    // 1. Head & Ears Component
+    this.drawCatHeadContour(ctx, variant);
+
+    // 2. Eyes Component (Dual-glint anime chibi eyes)
+    if (eyeStyle === 'glossy') {
+      this.drawGlossyEyes(ctx, -8, 8, 0, variant);
+    } else if (eyeStyle === 'wink') {
+      this.drawExpressionEyes(ctx, 'wink', variant);
+    } else if (eyeStyle === 'smug') {
+      this.drawExpressionEyes(ctx, 'smug', variant);
+    }
+
+    // 3. Whiskers Component
+    this.drawCatWhiskers(ctx, variant);
+
+    // 4. Paws on Bottom Bezel
+    this.drawBezelPaws(ctx, -10, 10, 14, variant);
+
+    ctx.restore();
+  }
+
+  // =========================================================================
+  // 3. POSE_C: SIDEWAYS / LEANING / WALKING POSE (Walking Cat)
+  // =========================================================================
+  drawPoseC_WalkingCat(ctx, cx, cy, scale, variant, tick, progress) {
+    // Left-to-right stepped progression
+    const walkDistance = 90;
+    const startX = 18;
+    const curX = startX + (progress * walkDistance);
+    const stepFrame = Math.floor(tick / 2) % 4; // 4-frame stepped walk cycle
+    const bob = (stepFrame % 2 === 0) ? 0 : 1;
+    const y = cy + bob;
+
+    ctx.save();
+    ctx.translate(Math.round(curX), y);
+    ctx.scale(scale, scale);
+
+    // Head tilted up & left toward text
+    ctx.save();
+    ctx.translate(-8, -10);
+
+    // Head contour with elongated snout pointing up-left
     ctx.beginPath();
-    // Left ear
-    ctx.moveTo(-16, 12);
-    ctx.lineTo(-18, -4);
-    ctx.lineTo(-7, 2);
-    // Forehead
-    ctx.quadraticCurveTo(0, 3, 7, 2);
+    ctx.moveTo(0, 4);
+    // Dark snout tip
+    ctx.lineTo(-6, -4);
+    ctx.lineTo(-4, -7);
+    // Forehead to ear
+    ctx.lineTo(0, -4);
     // Right ear
-    ctx.lineTo(18, -4);
-    ctx.lineTo(16, 12);
+    ctx.lineTo(4, -10);
+    ctx.lineTo(6, -3);
+    // Back of head
+    ctx.quadraticCurveTo(8, 2, 6, 6);
     ctx.stroke();
+
+    // Fill in dark snout tip
+    ctx.beginPath();
+    ctx.moveTo(-6, -4);
+    ctx.lineTo(-4, -7);
+    ctx.lineTo(-3, -4);
+    ctx.closePath();
+    ctx.fill();
+
+    // Eye: small alert oval with glint
+    ctx.beginPath();
+    ctx.ellipse(0, -3, 2, 2.5, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#a8cde5';
+    ctx.fillRect(-0.5, -4, 1, 1); // white glint cutout
+    ctx.fillStyle = ctx.strokeStyle;
+
+    ctx.restore();
+
+    // Cat Body / Torso
+    ctx.beginPath();
+    ctx.moveTo(-7, -4);
+    // Arched back
+    ctx.quadraticCurveTo(3, -9, 14, -2);
+    // Rump / hindquarters
+    ctx.quadraticCurveTo(18, 4, 14, 8);
+    // Underbelly
+    ctx.lineTo(-2, 7);
+    // Chest
+    ctx.quadraticCurveTo(-6, 4, -7, -4);
+    ctx.stroke();
+
+    // Perked tail curling upward
+    ctx.beginPath();
+    ctx.moveTo(14, -1);
+    ctx.quadraticCurveTo(20, -6, 19, -12);
+    ctx.quadraticCurveTo(17, -13, 16, -9);
+    ctx.stroke();
+
+    // Stepped Walking Legs (Alternating 4 frames)
+    this.drawWalkingLegs(ctx, stepFrame, variant);
+
+    ctx.restore();
+  }
+
+  // Stepped walking legs cycle
+  drawWalkingLegs(ctx, stepFrame, variant) {
+    const legOffset = (variant === 1) ? 0.5 : 0;
+
+    // Front Left Leg & Front Right Leg
+    if (stepFrame === 0) {
+      // Front leg forward, back leg trailing
+      ctx.beginPath();
+      ctx.moveTo(-5, 6);
+      ctx.lineTo(-8, 14);
+      ctx.lineTo(-5, 14);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(-2, 6);
+      ctx.lineTo(0, 13);
+      ctx.stroke();
+
+      // Hind legs
+      ctx.beginPath();
+      ctx.moveTo(11, 7);
+      ctx.lineTo(8, 14);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(14, 7);
+      ctx.lineTo(16, 13);
+      ctx.stroke();
+    } else if (stepFrame === 1) {
+      // Passing position
+      ctx.beginPath();
+      ctx.moveTo(-5, 6);
+      ctx.lineTo(-5, 14);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(-2, 6);
+      ctx.lineTo(-3, 12);
+      ctx.stroke();
+
+      // Hind legs
+      ctx.beginPath();
+      ctx.moveTo(11, 7);
+      ctx.lineTo(11, 14);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(14, 7);
+      ctx.lineTo(13, 13);
+      ctx.stroke();
+    } else if (stepFrame === 2) {
+      // Opposite stride
+      ctx.beginPath();
+      ctx.moveTo(-5, 6);
+      ctx.lineTo(-2, 14);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(-2, 6);
+      ctx.lineTo(-6, 13);
+      ctx.stroke();
+
+      // Hind legs
+      ctx.beginPath();
+      ctx.moveTo(11, 7);
+      ctx.lineTo(14, 14);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(14, 7);
+      ctx.lineTo(9, 13);
+      ctx.stroke();
+    } else {
+      // Return passing position
+      ctx.beginPath();
+      ctx.moveTo(-4, 6);
+      ctx.lineTo(-4, 14);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(-1, 6);
+      ctx.lineTo(1, 12);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(11, 7);
+      ctx.lineTo(11, 14);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(13, 7);
+      ctx.lineTo(15, 12);
+      ctx.stroke();
+    }
+  }
+
+  // =========================================================================
+  // 4. POSE_D: RESTING / SLEEPING / CROUCHING POSE
+  // =========================================================================
+  drawPoseD_RestingCat(ctx, cx, cy, scale, variant, tick) {
+    const breathe = (tick % 6 < 3) ? 0 : 1;
+    ctx.save();
+    ctx.translate(cx, cy + breathe);
+    ctx.scale(scale, scale);
+
+    // Curled body
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 16, 9, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Tucked head at left
+    ctx.beginPath();
+    ctx.ellipse(-10, -2, 7, 6, 0.2, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Cat ear
+    ctx.beginPath();
+    ctx.moveTo(-14, -6);
+    ctx.lineTo(-12, -12);
+    ctx.lineTo(-7, -7);
+    ctx.stroke();
+
+    // Sleeping eye arc `⌒`
+    ctx.beginPath();
+    ctx.arc(-11, -1, 3, Math.PI * 1.1, Math.PI * 1.9);
+    ctx.stroke();
+
+    // Tail curled around body
+    ctx.beginPath();
+    ctx.arc(8, 4, 8, -Math.PI * 0.4, Math.PI * 0.8);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // =========================================================================
+  // 5. POSE_E: UNDERNEATH LARGE LYRIC TYPOGRAPHY (BOOM / ZOOM Cat)
+  // =========================================================================
+  drawPoseE_UnderText(ctx, cx, cy, scale, lookDir = 'center', variant = 0, tick = 0) {
+    let joltX = 0;
+    let joltY = 0;
+
+    if (lookDir === 'left') {
+      joltX = -3;
+    } else if (lookDir === 'right') {
+      joltX = 3;
+    } else if (lookDir === 'shake') {
+      joltX = (tick % 2 === 0) ? -1 : 1;
+      joltY = (tick % 4 < 2) ? -1 : 0;
+    }
+
+    ctx.save();
+    ctx.translate(cx + joltX, cy + joltY);
+    ctx.scale(scale, scale);
+
+    // Cat is squashed lower down underneath giant text
+    this.drawSquashedCatHead(ctx, variant);
+
+    // Wide alert eyes looking left, right, or straight up
+    if (lookDir === 'left') {
+      this.drawAlertEyes(ctx, -3, variant);
+    } else if (lookDir === 'right') {
+      this.drawAlertEyes(ctx, 3, variant);
+    } else {
+      this.drawAlertEyes(ctx, 0, variant);
+    }
 
     // Cheeks & Whiskers
-    // Left whiskers
-    ctx.beginPath();
-    ctx.moveTo(-18, 5);
-    ctx.lineTo(-24, 3);
-    ctx.moveTo(-18, 9);
-    ctx.lineTo(-25, 10);
-    // Right whiskers
-    ctx.moveTo(18, 5);
-    ctx.lineTo(24, 3);
-    ctx.moveTo(18, 9);
-    ctx.lineTo(25, 10);
-    ctx.stroke();
-
-    // Specific Eye & Mouth Expressions
-    switch (pose) {
-      case 'peek_glossy':
-        // Large round shiny anime eyes
-        this.drawGlossyEye(ctx, -7, 6, 4);
-        this.drawGlossyEye(ctx, 7, 6, 4);
-        // Cute cat mouth :3
-        ctx.beginPath();
-        ctx.moveTo(-3, 11);
-        ctx.quadraticCurveTo(-1.5, 13, 0, 11);
-        ctx.quadraticCurveTo(1.5, 13, 3, 11);
-        ctx.stroke();
-        break;
-
-      case 'peek_small':
-        // Small dot eyes
-        ctx.fillRect(-7, 6, 2, 2);
-        ctx.fillRect(7, 6, 2, 2);
-        // Small flat mouth
-        ctx.fillRect(-2, 10, 4, 1);
-        break;
-
-      case 'peek_look_left':
-        // Pupils shifted left
-        ctx.strokeRect(-9, 4, 5, 5);
-        ctx.fillRect(-9, 5, 3, 3);
-        ctx.strokeRect(5, 4, 5, 5);
-        ctx.fillRect(5, 5, 3, 3);
-        break;
-
-      case 'peek_look_right':
-        // Pupils shifted right
-        ctx.strokeRect(-9, 4, 5, 5);
-        ctx.fillRect(-7, 5, 3, 3);
-        ctx.strokeRect(5, 4, 5, 5);
-        ctx.fillRect(7, 5, 3, 3);
-        break;
-
-      case 'peek_shock':
-        // Huge alert circles with tiny dot in center
-        ctx.beginPath();
-        ctx.arc(-7, 6, 5, 0, Math.PI * 2);
-        ctx.arc(7, 6, 5, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.fillRect(-8, 5, 2, 2);
-        ctx.fillRect(6, 5, 2, 2);
-        break;
-
-      case 'cat_wink':
-        // Left eye winking ^, right eye glossy ●
-        ctx.beginPath();
-        ctx.moveTo(-10, 7);
-        ctx.lineTo(-7, 4);
-        ctx.lineTo(-4, 7);
-        ctx.stroke();
-        this.drawGlossyEye(ctx, 7, 6, 4);
-        // Smug grin
-        ctx.beginPath();
-        ctx.moveTo(-2, 11);
-        ctx.quadraticCurveTo(1, 14, 4, 11);
-        ctx.stroke();
-        break;
-
-      case 'cat_smug':
-        // Slanted horizontal smug eyes
-        ctx.fillRect(-10, 5, 6, 2);
-        ctx.fillRect(4, 5, 6, 2);
-        // Smirk mouth
-        ctx.beginPath();
-        ctx.moveTo(-2, 10);
-        ctx.lineTo(2, 12);
-        ctx.lineTo(5, 10);
-        ctx.stroke();
-        break;
-
-      case 'cat_confused_sweat':
-        // Tired flat eyes
-        ctx.fillRect(-8, 6, 5, 2);
-        ctx.fillRect(3, 6, 5, 2);
-        ctx.fillRect(-2, 10, 4, 1);
-        // Animated sweat bead above forehead
-        const sweatDropY = -8 + (tick % 6 < 3 ? 0 : 1);
-        ctx.beginPath();
-        ctx.arc(0, sweatDropY, 2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-        break;
-
-      case 'cat_hypnotized':
-        // Concentric spiral / dazed circles
-        this.drawSpiralEye(ctx, -7, 6, 5);
-        this.drawSpiralEye(ctx, 7, 6, 5);
-        // Flat dazed mouth
-        ctx.fillRect(-3, 11, 6, 1);
-        break;
-
-      case 'cat_crying':
-        // Closed diagonal crying eyes > <
-        ctx.beginPath();
-        // Left eye >
-        ctx.moveTo(-10, 4);
-        ctx.lineTo(-6, 7);
-        ctx.lineTo(-10, 10);
-        // Right eye <
-        ctx.moveTo(10, 4);
-        ctx.lineTo(6, 7);
-        ctx.lineTo(10, 10);
-        ctx.stroke();
-        // Open crying mouth
-        ctx.strokeRect(-3, 9, 6, 5);
-        // Tear drops
-        const tearY = 9 + ((tick * 2) % 6);
-        ctx.fillRect(-12, tearY, 2, 3);
-        ctx.fillRect(10, tearY, 2, 3);
-        break;
-
-      case 'cat_sparkle_close':
-      case 'cat_smile_close':
-      case 'cat_wave_close':
-        // Close-up cute head
-        this.drawGlossyEye(ctx, -7, 6, 5);
-        this.drawGlossyEye(ctx, 7, 6, 5);
-        // Heart nose / mouth
-        ctx.fillRect(-1, 9, 2, 2);
-        ctx.beginPath();
-        ctx.moveTo(-3, 11);
-        ctx.quadraticCurveTo(0, 13, 3, 11);
-        ctx.stroke();
-
-        // Waving paw for Scene 26
-        if (pose === 'cat_wave_close') {
-          const pawAngle = (tick % 4 < 2) ? -0.2 : 0.2;
-          ctx.save();
-          ctx.translate(16, 10);
-          ctx.rotate(pawAngle);
-          ctx.beginPath();
-          ctx.ellipse(0, 0, 4, 3, 0, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.restore();
-        }
-        break;
-
-      default:
-        this.drawGlossyEye(ctx, -7, 6, 4);
-        this.drawGlossyEye(ctx, 7, 6, 4);
-        ctx.fillRect(-2, 10, 4, 1);
-        break;
-    }
+    this.drawCatWhiskers(ctx, variant);
 
     ctx.restore();
   }
 
-  // --- 3. Scene 3: Walking Cat Angled ---
-  drawWalkingCat(ctx, cx, cy, scale, tick, progress) {
-    const walkPhase = tick % 4;
-    const x = cx + Math.sin(progress * Math.PI * 4) * 3;
-    const y = cy + (walkPhase % 2 === 0 ? 0 : 1);
+  // =========================================================================
+  // 6. POSE_F: EMOTIVE LOWER-SCREEN COMPOSITIONS
+  // =========================================================================
 
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(scale, scale);
-
-    // Body angled upwards
-    ctx.beginPath();
-    ctx.moveTo(-14, 18);
-    ctx.quadraticCurveTo(-6, 2, 4, -4);
-    // Head angled gazing up-left
-    ctx.lineTo(8, -12);
-    ctx.lineTo(0, -18);
-    ctx.lineTo(-4, -10);
-    ctx.stroke();
-
-    // Pointed ears
-    ctx.beginPath();
-    ctx.moveTo(0, -18);
-    ctx.lineTo(4, -24);
-    ctx.lineTo(7, -16);
-    ctx.stroke();
-
-    // Dark snout/nose gazing up
-    ctx.fillRect(-2, -14, 3, 3);
-    // Eye gazing up
-    ctx.fillRect(2, -10, 3, 3);
-
-    // Front & Back Legs in Stepped Walk Cycle
-    ctx.beginPath();
-    if (walkPhase < 2) {
-      // Step A
-      ctx.moveTo(-10, 16);
-      ctx.lineTo(-12, 22);
-      ctx.moveTo(-4, 14);
-      ctx.lineTo(-1, 22);
-      ctx.moveTo(6, 6);
-      ctx.lineTo(3, 16);
-    } else {
-      // Step B
-      ctx.moveTo(-10, 16);
-      ctx.lineTo(-7, 22);
-      ctx.moveTo(-4, 14);
-      ctx.lineTo(-6, 22);
-      ctx.moveTo(6, 6);
-      ctx.lineTo(9, 16);
-    }
-    ctx.stroke();
-
-    ctx.restore();
-  }
-
-  // --- 4. Scenes 8-11: Spiky Hair / Fur Creature (YOU GO / ZOOM) ---
-  drawSpikyCreature(ctx, cx, cy, scale, pose, tick) {
-    let offsetX = 0;
-    if (pose === 'spiky_look_left') offsetX = -2;
-    if (pose === 'spiky_look_right') offsetX = 2;
-
-    const bob = (tick % 4 < 2) ? 0 : 1;
-    const x = cx + offsetX;
-    const y = cy + bob;
-
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(scale, scale);
-
-    // Spiky flame/hair crown
-    ctx.beginPath();
-    ctx.moveTo(-22, 14);
-    ctx.lineTo(-18, 0);
-    ctx.lineTo(-14, 6);
-    ctx.lineTo(-8, -12);
-    ctx.lineTo(-3, 0);
-    ctx.lineTo(2, -16);
-    ctx.lineTo(7, -2);
-    ctx.lineTo(13, -10);
-    ctx.lineTo(16, 2);
-    ctx.lineTo(22, 14);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // Round alert eyes peeking under the spikes
-    ctx.fillStyle = '#a2c9e2'; // screen background color for eye cutout
-    ctx.beginPath();
-    ctx.arc(-7, 6, 4, 0, Math.PI * 2);
-    ctx.arc(7, 6, 4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = this.defaultInk;
-    ctx.stroke();
-
-    // Pupils direction
-    let pupilOff = 0;
-    if (pose === 'spiky_look_left') pupilOff = -1;
-    if (pose === 'spiky_look_right') pupilOff = 1;
-
-    ctx.fillRect(-8 + pupilOff, 5, 3, 3);
-    ctx.fillRect(6 + pupilOff, 5, 3, 3);
-
-    ctx.restore();
-  }
-
-  // --- 5. Scenes 12-13: Round Eyed Nerd Character ---
-  drawRoundEyedNerd(ctx, cx, cy, scale, pose, tick) {
-    const bob = (tick % 4 < 2) ? 0 : 1;
-    const y = cy + bob;
-
-    ctx.save();
-    ctx.translate(cx, y);
-    ctx.scale(scale, scale);
-
-    // Big round spectacle eyes
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(-10, -2, 9, 0, Math.PI * 2);
-    ctx.arc(10, -2, 9, 0, Math.PI * 2);
-    // Bridge connecting eyes
-    ctx.moveTo(-1, -2);
-    ctx.lineTo(1, -2);
-    ctx.stroke();
-
-    // Centered pupils
-    ctx.fillRect(-11, -3, 3, 3);
-    ctx.fillRect(9, -3, 3, 3);
-
-    // Mouth / snout below
-    ctx.beginPath();
-    ctx.arc(0, 9, 3, 0, Math.PI * 2);
-    ctx.stroke();
-
-    ctx.restore();
-  }
-
-  // --- 6. Scene 14: Cat Beside Blooming 5-Petal Flower ---
-  drawCatAndFlower(ctx, cx, cy, scale, tick) {
-    const sway = (tick % 4 < 2) ? -1 : 1;
-
+  // Scene 20: Knife Cat ("TO MAKE YOU SEE IT'S TRUE")
+  drawPoseF_KnifeCat(ctx, cx, cy, scale, variant, tick, progress) {
+    const sway = Math.sin(tick * 0.4) * 1.5;
     ctx.save();
     ctx.translate(cx, cy);
     ctx.scale(scale, scale);
 
-    // Cat on Left
-    ctx.save();
-    ctx.translate(-14, 2);
-    // Cat ears & head
+    // Head contour
+    this.drawCatHeadContour(ctx, variant);
+
+    // Happy closed slit eyes `- -`
     ctx.beginPath();
-    ctx.moveTo(-10, 10);
-    ctx.lineTo(-12, -2);
-    ctx.lineTo(-4, 2);
-    ctx.lineTo(4, 2);
-    ctx.lineTo(12, -2);
-    ctx.lineTo(10, 10);
+    ctx.moveTo(-10, 6);
+    ctx.lineTo(-6, 6);
+    ctx.moveTo(6, 6);
+    ctx.lineTo(10, 6);
     ctx.stroke();
-    // Eyes
-    ctx.fillRect(-5, 5, 2, 2);
-    ctx.fillRect(3, 5, 2, 2);
+
+    // Cute open/happy 'w' mouth
+    ctx.beginPath();
+    ctx.moveTo(-4, 9);
+    ctx.quadraticCurveTo(-2, 11, 0, 9);
+    ctx.quadraticCurveTo(2, 11, 4, 9);
+    ctx.stroke();
+
     // Whiskers
+    this.drawCatWhiskers(ctx, variant);
+
+    // Raised kitchen knife held in right paw (viewer's left)
+    ctx.save();
+    ctx.translate(-14, 8);
+    ctx.rotate(-0.2 + (sway * 0.04));
+
+    // Knife handle
+    ctx.fillRect(-2, 0, 4, 9);
+
+    // Knife crossguard
+    ctx.fillRect(-3.5, 0, 7, 1.5);
+
+    // Large kitchen knife blade (pointed upward and slightly curved)
     ctx.beginPath();
-    ctx.moveTo(-10, 6); ctx.lineTo(-14, 6);
-    ctx.moveTo(10, 6); ctx.lineTo(14, 6);
+    ctx.moveTo(-2, 0);
+    ctx.lineTo(-3, -20);
+    // Curved blade spine
+    ctx.quadraticCurveTo(-1, -26, 3, -26);
+    // Cutting edge curving down
+    ctx.quadraticCurveTo(4, -10, 2, 0);
+    ctx.closePath();
     ctx.stroke();
+
+    // Shiny glint reflection on blade (3 stepped sparkle variants)
+    const glintY = -12 + (variant * 4);
+    ctx.beginPath();
+    ctx.moveTo(0, glintY - 3);
+    ctx.lineTo(0, glintY + 3);
+    ctx.moveTo(-2, glintY);
+    ctx.lineTo(2, glintY);
+    ctx.stroke();
+
     ctx.restore();
 
-    // 5-Petal Flower on Right
-    ctx.save();
-    ctx.translate(14 + sway, -6);
-    // Stem
+    // Paw holding knife
     ctx.beginPath();
-    ctx.moveTo(0, 8);
-    ctx.quadraticCurveTo(-2, 14, 0, 20);
+    ctx.ellipse(-14, 8, 3.5, 3, 0, 0, Math.PI * 2);
     ctx.stroke();
 
-    // 5 Rounded Petals
-    for (let i = 0; i < 5; i++) {
-      const angle = (i * Math.PI * 2) / 5;
-      const px = Math.cos(angle) * 7;
-      const py = Math.sin(angle) * 7;
-      ctx.beginPath();
-      ctx.arc(px, py, 4, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-    // Flower Center
+    ctx.restore();
+  }
+
+  // Scene 21: Confused Cat ("I'M SO CONFUSED,")
+  drawPoseF_ConfusedCat(ctx, cx, cy, scale, variant, tick) {
+    const jitterX = (tick % 2 === 0) ? -0.5 : 0.5;
+    ctx.save();
+    ctx.translate(cx + jitterX, cy);
+    ctx.scale(scale, scale);
+
+    // Squashed / low crouching head
+    this.drawSquashedCatHead(ctx, variant);
+
+    // Horizontal slit dashes for eyes
     ctx.beginPath();
-    ctx.arc(0, 0, 3, 0, Math.PI * 2);
+    ctx.moveTo(-9, 7);
+    ctx.lineTo(-5, 7);
+    ctx.moveTo(5, 7);
+    ctx.lineTo(9, 7);
     ctx.stroke();
+
+    // Small flat mouth `_`
+    ctx.fillRect(-1.5, 10, 3, 1);
+
+    // Stress marks / radiating sweat ticks above head (`\ | /`)
+    const sweatTick = (variant === 0) ? -0.5 : (variant === 1 ? 0.5 : 0);
+    ctx.beginPath();
+    // Left sweat tick
+    ctx.moveTo(-4 + sweatTick, -9);
+    ctx.lineTo(-6 + sweatTick, -13);
+    // Center sweat drop
+    ctx.moveTo(0, -11 + sweatTick);
+    ctx.lineTo(0, -15 + sweatTick);
+    // Right sweat tick
+    ctx.moveTo(4 - sweatTick, -9);
+    ctx.lineTo(6 - sweatTick, -13);
+    ctx.stroke();
+
+    // Whiskers
+    this.drawCatWhiskers(ctx, variant);
+
+    ctx.restore();
+  }
+
+  // Scene 22: Hypnotic Spiral Eyes Cat ("BABY CAN'T YOU SEE?")
+  drawPoseF_HypnoCat(ctx, cx, cy, scale, variant, tick) {
+    const wobble = Math.sin(tick * 0.5) * 1;
+    ctx.save();
+    ctx.translate(cx, cy + wobble);
+    ctx.scale(scale, scale);
+
+    // Head contour
+    this.drawCatHeadContour(ctx, variant);
+
+    // Hypnotic concentric rings / spiral eyes in both eyes
+    this.drawSpiralEye(ctx, -8, 7, variant, tick);
+    this.drawSpiralEye(ctx, 8, 7, variant, tick);
+
+    // Tiny flat mouth `_`
+    ctx.fillRect(-2, 11, 4, 1);
+
+    // Whiskers
+    this.drawCatWhiskers(ctx, variant);
+
+    // Paws on bezel
+    this.drawBezelPaws(ctx, -10, 10, 14, variant);
+
+    ctx.restore();
+  }
+
+  // Draw concentric rings / spiral eye with stepped rotation
+  drawSpiralEye(ctx, ex, ey, variant, tick) {
+    const rot = (tick % 4) * (Math.PI / 2);
+    ctx.save();
+    ctx.translate(ex, ey);
+    ctx.rotate(rot);
+
+    // Outer ring
+    ctx.beginPath();
+    ctx.arc(0, 0, 4.5, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Inner ring
+    ctx.beginPath();
+    ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Center pupil dot
+    ctx.fillRect(-0.8, -0.8, 1.6, 1.6);
+
+    ctx.restore();
+  }
+
+  // Scene 23: Crying Cat ("PLEASE COME RESCUE ME")
+  drawPoseF_CryingCat(ctx, cx, cy, scale, variant, tick) {
+    const sobbingJolt = (tick % 4 < 2) ? 0 : 1.5;
+    ctx.save();
+    ctx.translate(cx, cy + sobbingJolt);
+    ctx.scale(scale, scale);
+
+    // Head contour
+    this.drawCatHeadContour(ctx, variant);
+
+    // Tightly squeezed crying eyes `> <`
+    ctx.beginPath();
+    // Left eye `>`
+    ctx.moveTo(-10, 4);
+    ctx.lineTo(-7, 6.5);
+    ctx.lineTo(-10, 9);
+    // Right eye `<`
+    ctx.moveTo(10, 4);
+    ctx.lineTo(7, 6.5);
+    ctx.lineTo(10, 9);
+    ctx.stroke();
+
+    // Wide open wailing crying mouth (rounded rectangle wail)
+    ctx.beginPath();
+    ctx.rect(-3.5, 8.5, 7, 7);
+    ctx.stroke();
+
+    // Streaming teardrop cascades (3 animated droplet variants)
+    const tearCycle = tick % 3;
+    ctx.beginPath();
+    // Left stream
+    ctx.moveTo(-7, 7);
+    ctx.lineTo(-8, 15);
+    // Right stream
+    ctx.moveTo(7, 7);
+    ctx.lineTo(8, 15);
+    ctx.stroke();
+
+    // Tear splashing droplets falling
+    if (tearCycle === 0) {
+      ctx.fillRect(-9, 13, 2, 2);
+      ctx.fillRect(8, 11, 2, 2);
+    } else if (tearCycle === 1) {
+      ctx.fillRect(-10, 16, 2, 2);
+      ctx.fillRect(9, 14, 2, 2);
+    } else {
+      ctx.fillRect(-8, 11, 2, 2);
+      ctx.fillRect(8, 16, 2, 2);
+    }
+
+    // Whiskers
+    this.drawCatWhiskers(ctx, variant);
+
+    // Paws resting on bezel
+    this.drawBezelPaws(ctx, -9, 9, 14, variant);
+
+    ctx.restore();
+  }
+
+  // Scene 24: Close-Up Starry Eyes Cat ("SWEET LITTLE")
+  drawPoseF_StarryCloseUpCat(ctx, cx, cy, scale, variant, tick) {
+    const breathe = (tick % 4 < 2) ? 0 : 1;
+    ctx.save();
+    ctx.translate(cx, cy + breathe);
+    ctx.scale(scale * 1.15, scale * 1.15); // Close-up magnification
+
+    // Wide close-up head contour
+    this.drawCatHeadContour(ctx, variant);
+
+    // Cute curved eyebrows above huge eyes
+    ctx.beginPath();
+    ctx.arc(-8, 1, 5, Math.PI * 1.1, Math.PI * 1.8);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(8, 1, 5, Math.PI * 1.2, Math.PI * 1.9);
+    ctx.stroke();
+
+    // Giant starry eyes
+    this.drawStarryEyes(ctx, -8, 7, 8, 7, variant);
+
+    // Cute rounded triangle nose
+    ctx.beginPath();
+    ctx.moveTo(-2, 9);
+    ctx.lineTo(2, 9);
+    ctx.lineTo(0, 11.5);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fillRect(-1, 9.5, 2, 1);
+
+    // Whiskers (3 whiskers per cheek in close-up)
+    this.drawCatWhiskers(ctx, variant, 3);
+
+    // Paws on bezel
+    this.drawBezelPaws(ctx, -10, 10, 14, variant);
+
+    ctx.restore();
+  }
+
+  // Scene 25: Joyful Beaming Cat ("I KNOW WHAT YOU")
+  drawPoseF_JoyfulCat(ctx, cx, cy, scale, variant, tick) {
+    const bounce = (tick % 4 < 2) ? 0 : 2;
+    ctx.save();
+    ctx.translate(cx, cy + bounce);
+    ctx.scale(scale * 1.1, scale * 1.1);
+
+    // Head contour
+    this.drawCatHeadContour(ctx, variant);
+
+    // Eyebrows
+    ctx.beginPath();
+    ctx.arc(-8, 1, 5, Math.PI * 1.1, Math.PI * 1.8);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(8, 1, 5, Math.PI * 1.2, Math.PI * 1.9);
+    ctx.stroke();
+
+    // Glossy eyes
+    this.drawGlossyEyes(ctx, -8, 8, 0, variant);
+
+    // Cute nose & open happy mouth
+    ctx.beginPath();
+    ctx.moveTo(-2, 9);
+    ctx.lineTo(2, 9);
+    ctx.lineTo(0, 11);
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(0, 12, 3, 0, Math.PI);
+    ctx.stroke();
+
+    // Whiskers
+    this.drawCatWhiskers(ctx, variant, 3);
+
+    // Paws on bezel
+    this.drawBezelPaws(ctx, -10, 10, 14, variant);
+
+    ctx.restore();
+  }
+
+  // Scene 26: Waving Paw Cat ("WANT FROM ME")
+  drawPoseF_WavingPawCat(ctx, cx, cy, scale, variant, tick) {
+    const bob = (tick % 4 < 2) ? 0 : 1;
+    ctx.save();
+    ctx.translate(cx, cy + bob);
+    ctx.scale(scale * 1.1, scale * 1.1);
+
+    // Head contour
+    this.drawCatHeadContour(ctx, variant);
+
+    // Eyebrows
+    ctx.beginPath();
+    ctx.arc(-8, 1, 5, Math.PI * 1.1, Math.PI * 1.8);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(8, 1, 5, Math.PI * 1.2, Math.PI * 1.9);
+    ctx.stroke();
+
+    // Glossy eyes
+    this.drawGlossyEyes(ctx, -8, 8, 0, variant);
+
+    // Nose
+    ctx.beginPath();
+    ctx.moveTo(-2, 9);
+    ctx.lineTo(2, 9);
+    ctx.lineTo(0, 11);
+    ctx.closePath();
+    ctx.stroke();
+
+    // Whiskers
+    this.drawCatWhiskers(ctx, variant, 3);
+
+    // Left paw on bezel
+    ctx.beginPath();
+    ctx.ellipse(-10, 14, 3, 2, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Right Waving Paw (3 stepped wave positions: left tilt, upright, right tilt)
+    const waveFrame = Math.floor(tick / 2) % 3;
+    const waveAngle = (waveFrame === 0) ? -0.3 : (waveFrame === 1 ? 0 : 0.35);
+
+    ctx.save();
+    ctx.translate(12, 11);
+    ctx.rotate(waveAngle);
+
+    // Paw arm stem
+    ctx.beginPath();
+    ctx.moveTo(-2, 4);
+    ctx.lineTo(-2, -4);
+    ctx.lineTo(2, -4);
+    ctx.lineTo(2, 4);
+    ctx.stroke();
+
+    // Paw pad with claw/finger ticks
+    ctx.beginPath();
+    ctx.arc(0, -5, 3.5, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillRect(-2, -9, 1, 2);
+    ctx.fillRect(0, -9.5, 1, 2);
+    ctx.fillRect(2, -9, 1, 2);
+
     ctx.restore();
 
     ctx.restore();
   }
 
-  // --- 7. Scene 15: Two Cats Bouncing Side-by-Side ---
-  drawBouncingDuo(ctx, cx, cy, scale, tick) {
-    const bob1 = (tick % 4 < 2) ? 0 : 2;
-    const bob2 = (tick % 4 >= 2) ? 0 : 2;
+  // =========================================================================
+  // 7. SPECIAL GRAPHIC: EXAGGERATED JAGGED / EXPLOSION SHAPE (Scenes 8-11)
+  // =========================================================================
+  drawSpikyCreature(ctx, cx, cy, scale, pose, variant, tick) {
+    let joltX = 0;
+    if (pose === 'look_left') joltX = -3;
+    else if (pose === 'look_right') joltX = 3;
+    else if (pose === 'centered_jolt') joltX = (tick % 2 === 0) ? -1 : 1;
+
+    ctx.save();
+    ctx.translate(cx + joltX, cy);
+    ctx.scale(scale, scale);
+
+    // 3 stepped variants of the jagged burst outline
+    this.drawJaggedBurstOutline(ctx, variant);
+
+    // Eyes peeking out from underneath the spiky energy burst
+    if (pose === 'look_left') {
+      this.drawAlertEyes(ctx, -2, variant);
+    } else if (pose === 'look_right') {
+      this.drawAlertEyes(ctx, 2, variant);
+    } else {
+      this.drawAlertEyes(ctx, 0, variant);
+    }
+
+    ctx.restore();
+  }
+
+  // Recreates the exaggerated jagged explosion energy shape observed in scene 8
+  drawJaggedBurstOutline(ctx, variant) {
+    const varOffset = (variant === 1) ? 1 : (variant === 2 ? -1 : 0);
+
+    // Outer jagged silhouette (solid dark ink fill at outer boundary)
+    ctx.beginPath();
+    ctx.moveTo(-24, 14);
+    ctx.lineTo(-22, 5);
+    ctx.lineTo(-18, 8 + varOffset);
+    ctx.lineTo(-14, -2 - varOffset);
+    ctx.lineTo(-10, 4);
+    ctx.lineTo(-5, -12 + varOffset); // High central spike
+    ctx.lineTo(0, 0);
+    ctx.lineTo(4, -8 - varOffset);
+    ctx.lineTo(9, 2);
+    ctx.lineTo(14, -14 + varOffset); // Right high spike
+    ctx.lineTo(17, 3);
+    ctx.lineTo(21, -3 + varOffset);
+    ctx.lineTo(24, 14);
+    ctx.closePath();
+    ctx.stroke();
+
+    // Inner lighter layer / flame folds
+    ctx.beginPath();
+    ctx.moveTo(-18, 14);
+    ctx.lineTo(-14, 7);
+    ctx.lineTo(-10, 11 + varOffset);
+    ctx.lineTo(-4, 0 - varOffset);
+    ctx.lineTo(0, 7);
+    ctx.lineTo(6, -2 + varOffset);
+    ctx.lineTo(11, 9);
+    ctx.lineTo(16, 5 - varOffset);
+    ctx.lineTo(18, 14);
+    ctx.stroke();
+  }
+
+  // =========================================================================
+  // 8. SPECIAL GRAPHIC: DAISY FLOWER & PEEKING CAT (Scene 14 "PLAYTOY")
+  // =========================================================================
+  drawCatAndFlower(ctx, cx, cy, scale, variant, tick) {
+    const sway = Math.sin(tick * 0.3) * 1.5;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(scale, scale);
+
+    // 1. Peeking cat behind flower (left side)
+    ctx.save();
+    ctx.translate(-14, 2);
+    this.drawSquashedCatHead(ctx, variant);
+    this.drawAlertEyes(ctx, 1, variant);
+    this.drawCatWhiskers(ctx, variant);
+    ctx.restore();
+
+    // 2. Daisy Flower Drawing (right side)
+    ctx.save();
+    ctx.translate(10, 0);
+
+    // Flower stem
+    ctx.beginPath();
+    ctx.moveTo(0, 4);
+    ctx.quadraticCurveTo(sway * 0.8, 10, 2, 18);
+    ctx.stroke();
+
+    // Stem leaf bud
+    ctx.beginPath();
+    ctx.moveTo(1, 11);
+    ctx.quadraticCurveTo(6, 9, 7, 13);
+    ctx.quadraticCurveTo(3, 14, 1, 12);
+    ctx.stroke();
+
+    // Flower Head: 5 irregular rounded daisy petals radiating from central pistil
+    ctx.save();
+    ctx.translate(sway, 0);
+
+    // Central circular pistil
+    ctx.beginPath();
+    ctx.arc(0, 0, 4, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 5 petals radiating outward
+    for (let p = 0; p < 5; p++) {
+      const angle = (p * (Math.PI * 2 / 5)) - (Math.PI / 2);
+      const petalDist = 8;
+      const px = Math.cos(angle) * petalDist;
+      const py = Math.sin(angle) * petalDist;
+      const petalRadius = 4 + ((p + variant) % 2 * 0.6);
+
+      ctx.beginPath();
+      ctx.arc(px, py, petalRadius, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  // =========================================================================
+  // 9. SPECIAL CHARACTERS: ROUND-EYED NERD / FROG (Scenes 12-13)
+  // =========================================================================
+  drawRoundEyedNerd(ctx, cx, cy, scale, pose, variant, tick) {
+    const pop = (pose === 'playboy_hit') ? ((tick % 2 === 0) ? -2 : 0) : 0;
+    ctx.save();
+    ctx.translate(cx, cy + pop);
+    ctx.scale(scale, scale);
+
+    // Two huge round spectacle / eyes connected by center bridge
+    // Left eye ring
+    ctx.beginPath();
+    ctx.arc(-8, -1, 7.5, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Right eye ring
+    ctx.beginPath();
+    ctx.arc(8, -1, 7.5, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Connecting nose bridge
+    ctx.fillRect(-1.5, -2, 3, 1.5);
+
+    // Small centered pupil dots
+    ctx.fillRect(-9, -2, 2, 2);
+    ctx.fillRect(7, -2, 2, 2);
+
+    // Pointed chin / snout underneath
+    ctx.beginPath();
+    ctx.moveTo(-8, 5);
+    ctx.lineTo(0, 11);
+    ctx.lineTo(8, 5);
+    ctx.stroke();
+
+    // Small 'o' mouth
+    ctx.beginPath();
+    ctx.arc(0, 7, 1.5, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // =========================================================================
+  // 10. SPECIAL CHARACTERS: BOUNCING CAT DUO (Scene 15)
+  // =========================================================================
+  drawBouncingDuo(ctx, cx, cy, scale, variant, tick) {
+    // Stepped alternating bounce
+    const hopFrame = Math.floor(tick / 2) % 4;
+    const cat1Bounce = (hopFrame === 0 || hopFrame === 1) ? -3 : 0;
+    const cat2Bounce = (hopFrame === 2 || hopFrame === 3) ? -3 : 0;
 
     ctx.save();
     ctx.translate(cx, cy);
@@ -518,178 +997,364 @@ export class CharacterRenderer {
 
     // Left Cat
     ctx.save();
-    ctx.translate(-24, bob1);
-    this.drawMiniCatHead(ctx, 0, 0);
+    ctx.translate(-22, cat1Bounce);
+    this.drawSquashedCatHead(ctx, variant);
+    this.drawAlertEyes(ctx, 0, variant);
+    this.drawCatWhiskers(ctx, variant);
+    ctx.beginPath();
+    ctx.arc(0, 8, 2, 0, Math.PI);
+    ctx.stroke();
     ctx.restore();
 
-    // Right Cat
+    // Right Cat (hands together in front of chest)
     ctx.save();
-    ctx.translate(24, bob2);
-    this.drawMiniCatHead(ctx, 0, 0);
+    ctx.translate(22, cat2Bounce);
+    this.drawSquashedCatHead(ctx, variant);
+    this.drawAlertEyes(ctx, 0, variant);
+    this.drawCatWhiskers(ctx, variant);
+    // Hands together
+    ctx.beginPath();
+    ctx.arc(-2, 10, 2.5, 0, Math.PI * 2);
+    ctx.arc(2, 10, 2.5, 0, Math.PI * 2);
+    ctx.stroke();
     ctx.restore();
 
     ctx.restore();
   }
 
-  // --- 8. Scenes 16-17: Tomato Creature & Singing Cat Duo ---
-  drawTomatoCatDuo(ctx, cx, cy, scale, pose, tick) {
-    const bob = (tick % 4 < 2) ? 0 : 1;
-
+  // =========================================================================
+  // 11. SPECIAL CHARACTERS: TOMATO FRIEND & SINGING CAT DUO (Scenes 16-17)
+  // =========================================================================
+  drawTomatoCatDuo(ctx, cx, cy, scale, pose, variant, tick) {
+    const rhythm = (tick % 4 < 2) ? 0 : 1;
     ctx.save();
-    ctx.translate(cx, cy + bob);
+    ctx.translate(cx, cy + rhythm);
     ctx.scale(scale, scale);
 
-    // Left Creature: Strawberry / Tomato-topped
+    // Left Character: Eggplant / Tomato creature with stem & leaf crown
     ctx.save();
-    ctx.translate(-20, 0);
-    // Head circle
+    ctx.translate(-20, 2);
+
+    // Rounded head
     ctx.beginPath();
-    ctx.arc(0, 2, 10, 0, Math.PI * 2);
+    ctx.arc(0, 2, 11, 0, Math.PI * 2);
     ctx.stroke();
-    // Leaf crown / stem
+
+    // Calyx / leaf crown on top of head
     ctx.beginPath();
-    ctx.moveTo(0, -8);
-    ctx.lineTo(0, -15);
-    ctx.lineTo(3, -14);
-    ctx.moveTo(-6, -8); ctx.lineTo(-9, -12); ctx.lineTo(-3, -8);
-    ctx.moveTo(6, -8); ctx.lineTo(9, -12); ctx.lineTo(3, -8);
+    ctx.moveTo(-8, -6);
+    ctx.lineTo(-4, -9);
+    ctx.lineTo(0, -6);
+    ctx.lineTo(4, -9);
+    ctx.lineTo(8, -6);
     ctx.stroke();
-    // Cheerful face
-    ctx.fillRect(-4, 1, 2, 2);
-    ctx.fillRect(2, 1, 2, 2);
+
+    // Stem curling upward
+    ctx.beginPath();
+    ctx.moveTo(0, -7);
+    ctx.quadraticCurveTo(4, -14, 1, -17);
+    ctx.stroke();
+
+    // Cute smiling face dots & mouth
+    ctx.fillRect(-4, 0, 2, 2);
+    ctx.fillRect(2, 0, 2, 2);
     ctx.beginPath();
     ctx.arc(0, 4, 2.5, 0, Math.PI);
     ctx.stroke();
+
+    // Tiny hands on floor
+    ctx.beginPath();
+    ctx.arc(-8, 9, 2, 0, Math.PI * 2);
+    ctx.arc(8, 9, 2, 0, Math.PI * 2);
+    ctx.stroke();
+
     ctx.restore();
 
-    // Right Creature: Singing Cat with raised paw
+    // Right Character: Feather-furred / singing cat with open mouth
     ctx.save();
-    ctx.translate(20, 0);
-    this.drawMiniCatHead(ctx, 0, 0);
-    // Singing mouth (open O or V)
+    ctx.translate(20, 2);
+
+    // Feather-furred head contour
     ctx.beginPath();
-    ctx.moveTo(-2, 5);
-    ctx.lineTo(0, 8);
-    ctx.lineTo(2, 5);
+    ctx.moveTo(-12, 10);
+    ctx.lineTo(-14, 2);
+    ctx.lineTo(-10, 4);
+    ctx.lineTo(-12, -4); // Left ear
+    ctx.lineTo(-4, 1);
+    ctx.lineTo(4, 1);
+    ctx.lineTo(10, -4); // Right ear
+    ctx.lineTo(8, 4);
+    ctx.lineTo(12, 2);
+    ctx.lineTo(10, 10);
+    ctx.stroke();
+
+    // Singing eyes (slanted alert slits)
+    ctx.fillRect(-5, 0, 2, 2);
+    ctx.fillRect(4, 0, 2, 2);
+
+    // Wide open singing mouth (`v` or `o`)
+    ctx.beginPath();
+    ctx.moveTo(-3, 3);
+    ctx.lineTo(0, 7);
+    ctx.lineTo(3, 3);
     ctx.closePath();
-    ctx.stroke();
-    // Raised paw
-    const pawWave = (tick % 4 < 2) ? 0 : -2;
-    ctx.beginPath();
-    ctx.moveTo(10, 4);
-    ctx.lineTo(15, 0 + pawWave);
-    ctx.stroke();
-    ctx.restore();
-
-    ctx.restore();
-  }
-
-  // --- 9. Scene 20: Cat Holding Knife / Dagger ---
-  drawKnifeCat(ctx, cx, cy, scale, tick, progress) {
-    const sway = Math.sin(progress * Math.PI * 4) * 1.5;
-
-    ctx.save();
-    ctx.translate(cx + sway, cy);
-    ctx.scale(scale, scale);
-
-    // Cat head
-    ctx.beginPath();
-    ctx.moveTo(-16, 12);
-    ctx.lineTo(-18, -4);
-    ctx.lineTo(-7, 2);
-    ctx.quadraticCurveTo(0, 3, 7, 2);
-    ctx.lineTo(18, -4);
-    ctx.lineTo(16, 12);
-    ctx.stroke();
-
-    // Innocent smiling face
-    ctx.fillRect(-6, 5, 3, 3);
-    ctx.fillRect(3, 5, 3, 3);
-    ctx.beginPath();
-    ctx.moveTo(-2, 10);
-    ctx.quadraticCurveTo(0, 12, 2, 10);
-    ctx.stroke();
-
-    // Raised Paw holding Dagger
-    const knifeBob = (tick % 4 < 2) ? 0 : -1;
-    ctx.save();
-    ctx.translate(-16, knifeBob);
-
-    // Paw
-    ctx.beginPath();
-    ctx.arc(-2, 2, 3, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Curved Dagger Blade
-    ctx.beginPath();
-    ctx.moveTo(-2, 0);
-    ctx.lineTo(-6, -20);
-    ctx.quadraticCurveTo(-1, -12, 2, -2);
-    ctx.closePath();
-    ctx.stroke();
-
-    // Dagger Handle / Hilt
-    ctx.fillRect(-5, 0, 6, 2);
-    ctx.fillRect(-3, 2, 2, 4);
-    ctx.restore();
-
-    ctx.restore();
-  }
-
-  // --- Helper Primitives ---
-  drawMiniCatHead(ctx, x, y) {
-    ctx.beginPath();
-    ctx.moveTo(x - 12, y + 8);
-    ctx.lineTo(x - 14, y - 2);
-    ctx.lineTo(x - 5, y + 2);
-    ctx.lineTo(x + 5, y + 2);
-    ctx.lineTo(x + 14, y - 2);
-    ctx.lineTo(x + 12, y + 8);
     ctx.stroke();
 
     // Whiskers
     ctx.beginPath();
-    ctx.moveTo(x - 12, y + 4); ctx.lineTo(x - 16, y + 4);
-    ctx.moveTo(x + 12, y + 4); ctx.lineTo(x + 16, y + 4);
+    ctx.moveTo(-10, 3);
+    ctx.lineTo(-16, 2);
+    ctx.moveTo(10, 3);
+    ctx.lineTo(16, 2);
     ctx.stroke();
 
-    // Cute face
-    ctx.fillRect(x - 5, y + 3, 2, 2);
-    ctx.fillRect(x + 3, y + 3, 2, 2);
-    ctx.fillRect(x - 1, y + 6, 2, 1);
+    ctx.restore();
+
+    ctx.restore();
   }
 
-  drawGlossyEye(ctx, x, y, r) {
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    // White gloss highlight dot
-    ctx.fillStyle = '#a2c9e2';
-    ctx.fillRect(x - r + 1.5, y - r + 1.5, 1.5, 1.5);
-    ctx.fillStyle = this.defaultInk;
-  }
-
-  drawSpiralEye(ctx, x, y, r) {
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.arc(x, y, r * 0.5, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.fillRect(x - 1, y - 1, 2, 2);
-  }
-
-  drawStar(ctx, cx, cy, rOuter, rInner) {
-    const points = 5;
-    ctx.beginPath();
-    for (let i = 0; i < points * 2; i++) {
-      const r = (i % 2 === 0) ? rOuter : rInner;
-      const a = (i * Math.PI) / points - Math.PI / 2;
-      const x = cx + Math.cos(a) * r;
-      const y = cy + Math.sin(a) * r;
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
+  // =========================================================================
+  // CAT POSE DISPATCHER HELPER
+  // =========================================================================
+  renderCatPose(ctx, cx, cy, scale, pose, movement, variant, tick, progress) {
+    if (pose === 'peek_glossy') {
+      this.drawPoseB_PeekingCat(ctx, cx, cy, scale, 'glossy', variant, tick);
+    } else if (pose === 'look_left') {
+      this.drawPoseE_UnderText(ctx, cx, cy, scale, 'left', variant, tick);
+    } else if (pose === 'look_right') {
+      this.drawPoseE_UnderText(ctx, cx, cy, scale, 'right', variant, tick);
+    } else if (pose === 'alert_shake') {
+      this.drawPoseE_UnderText(ctx, cx, cy, scale, 'shake', variant, tick);
+    } else if (pose === 'wink') {
+      this.drawPoseB_PeekingCat(ctx, cx, cy, scale, 'wink', variant, tick);
+    } else if (pose === 'smug') {
+      this.drawPoseB_PeekingCat(ctx, cx, cy, scale, 'smug', variant, tick);
+    } else if (pose === 'confused_sweat') {
+      this.drawPoseF_ConfusedCat(ctx, cx, cy, scale, variant, tick);
+    } else if (pose === 'hypno_spiral') {
+      this.drawPoseF_HypnoCat(ctx, cx, cy, scale, variant, tick);
+    } else if (pose === 'crying_plead') {
+      this.drawPoseF_CryingCat(ctx, cx, cy, scale, variant, tick);
+    } else if (pose === 'starry_eyes') {
+      this.drawPoseF_StarryCloseUpCat(ctx, cx, cy, scale, variant, tick);
+    } else if (pose === 'joyful_beam') {
+      this.drawPoseF_JoyfulCat(ctx, cx, cy, scale, variant, tick);
+    } else if (pose === 'paw_wave') {
+      this.drawPoseF_WavingPawCat(ctx, cx, cy, scale, variant, tick);
+    } else {
+      this.drawPoseB_PeekingCat(ctx, cx, cy, scale, 'glossy', variant, tick);
     }
+  }
+
+  // =========================================================================
+  // SHARED COMPONENT PRIMITIVES
+  // =========================================================================
+
+  // Cat Head & Ears Contour (Hand-drawn, intentionally imperfect lines)
+  drawCatHeadContour(ctx, variant) {
+    const varOffset = (variant === 1) ? 0.5 : (variant === 2 ? -0.5 : 0);
+
+    ctx.beginPath();
+    // Left ear base
+    ctx.moveTo(-16, 14);
+    // Left cheek contour
+    ctx.quadraticCurveTo(-17 + varOffset, 5, -16, 0);
+    // Left ear outer edge
+    ctx.lineTo(-18 + varOffset, -10);
+    // Left ear rounded tip to inner base
+    ctx.quadraticCurveTo(-14, -10, -7, 0);
+    // Forehead gentle dip
+    ctx.quadraticCurveTo(0, 1 + varOffset, 7, 0);
+    // Right ear inner edge to tip
+    ctx.lineTo(18 - varOffset, -10);
+    // Right ear outer edge
+    ctx.quadraticCurveTo(17, 5, 16, 14);
+    ctx.stroke();
+  }
+
+  // Squashed lower cat head (underneath giant typography)
+  drawSquashedCatHead(ctx, variant) {
+    const varOffset = (variant === 1) ? 0.5 : 0;
+    ctx.beginPath();
+    ctx.moveTo(-16, 14);
+    ctx.quadraticCurveTo(-17, 9, -15, 4);
+    // Left ear
+    ctx.lineTo(-16, -2);
+    ctx.lineTo(-7, 3);
+    // Forehead dip
+    ctx.quadraticCurveTo(0, 4 + varOffset, 7, 3);
+    // Right ear
+    ctx.lineTo(16, -2);
+    ctx.lineTo(15, 4);
+    ctx.quadraticCurveTo(17, 9, 16, 14);
+    ctx.stroke();
+  }
+
+  // Iconic Anime Chibi Glossy Eyes (Solid dark fill with TWO white glints!)
+  drawGlossyEyes(ctx, leftX, rightX, lookDirX = 0, variant = 0) {
+    const y = 8;
+    const radius = 4.5;
+    const bgPixel = '#a8cde5'; // Cutout color to make specular highlights
+
+    // Left Eye
+    ctx.beginPath();
+    ctx.arc(leftX + lookDirX, y, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Right Eye
+    ctx.beginPath();
+    ctx.arc(rightX + lookDirX, y, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cutout Dual Glints:
+    // Glint 1: Larger primary specular glint in upper-left
+    // Glint 2: Smaller secondary glint in lower-right
+    ctx.fillStyle = bgPixel;
+
+    // Left Eye Glints
+    ctx.fillRect(leftX + lookDirX - 2.5, y - 2.5, 2, 2);
+    ctx.fillRect(leftX + lookDirX + 1, y + 1, 1, 1);
+
+    // Right Eye Glints
+    ctx.fillRect(rightX + lookDirX - 2.5, y - 2.5, 2, 2);
+    ctx.fillRect(rightX + lookDirX + 1, y + 1, 1, 1);
+
+    ctx.fillStyle = ctx.strokeStyle;
+  }
+
+  // Giant Starry Eyes (Scene 24)
+  drawStarryEyes(ctx, leftX, rightX, eyeY = 8, radius = 5, variant = 0) {
+    const bgPixel = '#a8cde5';
+
+    // Left eye filled
+    ctx.beginPath();
+    ctx.arc(leftX, eyeY, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Right eye filled
+    ctx.beginPath();
+    ctx.arc(rightX, eyeY, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Star-shaped glint inside each eye
+    ctx.fillStyle = bgPixel;
+
+    this.drawStar(ctx, leftX - 1, eyeY - 1, 2.5, 1.2);
+    ctx.fill();
+    ctx.fillRect(leftX + 1.5, eyeY + 1.5, 1, 1);
+
+    this.drawStar(ctx, rightX - 1, eyeY - 1, 2.5, 1.2);
+    ctx.fill();
+    ctx.fillRect(rightX + 1.5, eyeY + 1.5, 1, 1);
+
+    ctx.fillStyle = ctx.strokeStyle;
+  }
+
+  // Alert Eyes (Under text / spiky creature)
+  drawAlertEyes(ctx, lookDirX = 0, variant = 0) {
+    ctx.fillRect(-9 + lookDirX, 5, 2.5, 2.5);
+    ctx.fillRect(7 + lookDirX, 5, 2.5, 2.5);
+  }
+
+  // Expression Eyes (Wink, Smug)
+  drawExpressionEyes(ctx, expression, variant) {
+    if (expression === 'wink') {
+      // Left eye winking `>`
+      ctx.beginPath();
+      ctx.moveTo(-10, 6);
+      ctx.lineTo(-7, 8.5);
+      ctx.lineTo(-10, 11);
+      ctx.stroke();
+
+      // Right eye confident slanted
+      ctx.beginPath();
+      ctx.moveTo(6, 7);
+      ctx.lineTo(10, 8.5);
+      ctx.lineTo(6, 10);
+      ctx.stroke();
+
+      // Cute open tongue smile `:P`
+      ctx.beginPath();
+      ctx.moveTo(-2, 10);
+      ctx.quadraticCurveTo(0, 13, 2, 10);
+      ctx.stroke();
+      ctx.fillRect(-1, 10, 2, 2.5);
+    } else if (expression === 'smug') {
+      // Both eyes squinting smugly
+      ctx.beginPath();
+      ctx.moveTo(-10, 7.5);
+      ctx.lineTo(-6, 7.5);
+      ctx.moveTo(6, 7.5);
+      ctx.lineTo(10, 7.5);
+      ctx.stroke();
+
+      // Smug cat smile `:3`
+      ctx.beginPath();
+      ctx.moveTo(-4, 10);
+      ctx.quadraticCurveTo(-2, 12, 0, 10);
+      ctx.quadraticCurveTo(2, 12, 4, 10);
+      ctx.stroke();
+    }
+  }
+
+  // Cat Whiskers
+  drawCatWhiskers(ctx, variant = 0, count = 2) {
+    const varOffset = (variant === 1) ? 0.5 : 0;
+    ctx.beginPath();
+    // Left side
+    ctx.moveTo(-16, 7 + varOffset);
+    ctx.lineTo(-24, 5);
+    ctx.moveTo(-16, 10 - varOffset);
+    ctx.lineTo(-24, 11);
+    if (count > 2) {
+      ctx.moveTo(-15, 4);
+      ctx.lineTo(-22, 1);
+    }
+
+    // Right side
+    ctx.moveTo(16, 7 + varOffset);
+    ctx.lineTo(24, 5);
+    ctx.moveTo(16, 10 - varOffset);
+    ctx.lineTo(24, 11);
+    if (count > 2) {
+      ctx.moveTo(15, 4);
+      ctx.lineTo(22, 1);
+    }
+    ctx.stroke();
+  }
+
+  // Paws Resting on Bottom Bezel
+  drawBezelPaws(ctx, leftX, rightX, pawY = 14, variant = 0) {
+    ctx.beginPath();
+    ctx.ellipse(leftX, pawY, 3.5, 2.5, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.ellipse(rightX, pawY, 3.5, 2.5, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // 5-Pointed Star Drawing Helper
+  drawStar(ctx, cx, cy, outerRadius, innerRadius) {
+    let rot = Math.PI / 2 * 3;
+    let x = cx;
+    let y = cy;
+    const step = Math.PI / 5;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - outerRadius);
+    for (let i = 0; i < 5; i++) {
+      x = cx + Math.cos(rot) * outerRadius;
+      y = cy + Math.sin(rot) * outerRadius;
+      ctx.lineTo(x, y);
+      rot += step;
+
+      x = cx + Math.cos(rot) * innerRadius;
+      y = cy + Math.sin(rot) * innerRadius;
+      ctx.lineTo(x, y);
+      rot += step;
+    }
+    ctx.lineTo(cx, cy - outerRadius);
     ctx.closePath();
   }
 }

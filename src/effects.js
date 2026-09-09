@@ -1,46 +1,47 @@
 /**
- * effects.js - Screen shader effects and OLED dot matrix emulation.
- * Renders authentic display background, pixel grid, subtle bloom, and stepped motion.
+ * effects.js - LCD Screen Environment & Subtle Monochrome Pixel Effects.
+ * 
+ * Recreates a clean pale blue LCD display with restrained contrast,
+ * subtle dot-matrix pixel character, and dark navy/black linework.
+ * Strictly avoids modern gradients or glossy treatments.
  */
 
 export class EffectsRenderer {
   constructor() {
     this.palettes = {
       'oled-blue': {
-        bg: '#a2c9e2',
-        ink: '#0e1422',
-        grid: 'rgba(144, 182, 208, 0.25)',
-        bloom: 'rgba(162, 201, 226, 0.15)'
+        name: 'Pale Blue LCD (Reference)',
+        bg: '#a6cce6',
+        ink: '#0e1524',
+        gridDot: 'rgba(140, 178, 206, 0.22)'
       },
       'oled-white': {
-        bg: '#e2e8f0',
-        ink: '#0f172a',
-        grid: 'rgba(203, 213, 225, 0.3)',
-        bloom: 'rgba(226, 232, 240, 0.2)'
+        name: 'Crisp White LCD',
+        bg: '#dce5ed',
+        ink: '#0e1622',
+        gridDot: 'rgba(180, 195, 210, 0.25)'
       },
       'amber-phosphor': {
-        bg: '#ffb833',
-        ink: '#2b1600',
-        grid: 'rgba(220, 150, 20, 0.3)',
-        bloom: 'rgba(255, 184, 51, 0.25)'
+        name: 'Amber Phosphor',
+        bg: '#f8b438',
+        ink: '#261200',
+        gridDot: 'rgba(215, 145, 20, 0.25)'
       },
       'matrix-green': {
-        bg: '#5bf870',
-        ink: '#062409',
-        grid: 'rgba(60, 190, 80, 0.25)',
-        bloom: 'rgba(91, 248, 112, 0.22)'
+        name: 'Matrix Green',
+        bg: '#62f476',
+        ink: '#042208',
+        gridDot: 'rgba(50, 180, 70, 0.22)'
       },
       'inverted': {
-        bg: '#0d121d',
-        ink: '#8fd2ff',
-        grid: 'rgba(20, 30, 48, 0.6)',
-        bloom: 'rgba(143, 210, 255, 0.3)'
+        name: 'Dark Inverted',
+        bg: '#0e1524',
+        ink: '#a6cce6',
+        gridDot: 'rgba(25, 38, 58, 0.5)'
       }
     };
 
     this.currentPalette = 'oled-blue';
-    this.enablePixelGrid = true;
-    this.enableScanlines = false;
   }
 
   setPalette(name) {
@@ -55,29 +56,22 @@ export class EffectsRenderer {
   }
 
   /**
-   * Clears the logical canvas with the authentic active screen background.
+   * Clears the logical canvas with a clean, flat pale blue LCD background.
+   * Restrained contrast, zero artificial modern gradients.
    */
   drawBackground(ctx, width = 128, height = 64) {
     const { bg } = this.getColors();
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, width, height);
-
-    // Subtle OLED vertical luminance gradient
-    const grad = ctx.createLinearGradient(0, 0, 0, height);
-    grad.addColorStop(0, 'rgba(255, 255, 255, 0.05)');
-    grad.addColorStop(0.5, 'rgba(255, 255, 255, 0.0)');
-    grad.addColorStop(1, 'rgba(0, 0, 0, 0.04)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, width, height);
   }
 
   /**
-   * Draws subpixel dot matrix lines on the logical canvas if desired.
+   * Subtle LCD character: minimal subpixel grid dot texture.
    */
   drawScreenOverlay(ctx, width = 128, height = 64) {
-    // Keep logical drawing clean so pixelated CSS scaling renders sharp pixels
-    // Edge vignette on OLED panel
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
+    // Subtle outer frame border matching authentic LCD panel active boundaries
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.lineWidth = 1;
     ctx.strokeRect(0.5, 0.5, width - 1, height - 1);
   }
 }

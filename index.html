@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bumblebee - OLED Animation Recreation</title>
-  <meta name="description" content="Frame-accurate programmatic recreation of the Bumblebee 128x64 OLED animation synchronized to master audio clock.">
+  <title>Bumblebee - LCD Animation Recreation</title>
+  <meta name="description" content="100% programmatic procedural recreation of the Bumblebee 128x64 LCD cartoon animation synchronized to master audio clock.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=VT323&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,8 +15,8 @@
     <!-- Header -->
     <header class="app-header">
       <div class="header-branding">
-        <div class="badge-tag">STEP 1 / 5 FOUNDATION</div>
-        <h1 class="app-title">Bumblebee <span>OLED Recreation</span></h1>
+        <div class="badge-tag">STEP 2 / 5 ARTWORK RECREATION</div>
+        <h1 class="app-title">Bumblebee <span>LCD Recreation</span></h1>
       </div>
       <div class="header-meta">
         <div class="pill-stat">
@@ -34,54 +34,14 @@
       </div>
     </header>
 
-    <!-- Main Stage -->
+    <!-- Main Stage (Clean LCD Display Focus - Photographed surrounding hardware excluded) -->
     <main class="stage-container">
-      <div class="device-wrapper">
-        <!-- Physical Breakout Board (SSD1306 0.96" OLED Module Style) -->
-        <div class="oled-pcb-board" id="pcb-board">
-          <!-- Mounting holes -->
-          <div class="mounting-hole hole-tl"></div>
-          <div class="mounting-hole hole-tr"></div>
-          <div class="mounting-hole hole-bl"></div>
-          <div class="mounting-hole hole-br"></div>
-
-          <!-- Header Pin Labels -->
-          <div class="pin-header-group">
-            <div class="pin-marker">
-              <span class="pin-num">1</span>
-              <div class="pin-solder"></div>
-              <span class="pin-label">GND</span>
-            </div>
-            <div class="pin-marker">
-              <span class="pin-num">2</span>
-              <div class="pin-solder"></div>
-              <span class="pin-label">VDD</span>
-            </div>
-            <div class="pin-marker">
-              <span class="pin-num">3</span>
-              <div class="pin-solder"></div>
-              <span class="pin-label">SCK</span>
-            </div>
-            <div class="pin-marker">
-              <span class="pin-num">4</span>
-              <div class="pin-solder"></div>
-              <span class="pin-label">SDA</span>
-            </div>
-          </div>
-
-          <!-- Screen Outer Bezel -->
-          <div class="oled-glass-bezel">
-            <div class="oled-screen-viewport">
-              <!-- Active logical 128x64 display canvas -->
-              <canvas id="display-canvas" width="512" height="256"></canvas>
-              <!-- CRT / Scanline / Pixel Grid Overlay -->
-              <div class="pixel-matrix-overlay" id="pixel-overlay"></div>
-              <div class="glass-glare-overlay"></div>
-            </div>
-            <div class="bezel-bottom-tab">
-              <span class="bezel-marking">SSD1306 128x64 OLED</span>
-            </div>
-          </div>
+      <div class="lcd-viewport-frame">
+        <div class="lcd-screen-inner">
+          <!-- Active logical 128x64 display canvas -->
+          <canvas id="display-canvas" width="512" height="256"></canvas>
+          <!-- Authentic subtle LCD dot matrix texture -->
+          <div class="lcd-pixel-grid-overlay" id="pixel-overlay"></div>
         </div>
       </div>
     </main>
@@ -133,9 +93,9 @@
             <div class="select-group">
               <label for="palette-select">Display Mode:</label>
               <select id="palette-select">
-                <option value="oled-blue" selected>OLED Pale Blue (Original)</option>
-                <option value="oled-white">OLED Crisp White</option>
-                <option value="amber-phosphor">Amber CRT / Retro</option>
+                <option value="oled-blue" selected>Pale Blue LCD (Reference)</option>
+                <option value="oled-white">Crisp White LCD</option>
+                <option value="amber-phosphor">Amber Phosphor</option>
                 <option value="matrix-green">Matrix Green</option>
                 <option value="inverted">Inverted Dark Mode</option>
               </select>
